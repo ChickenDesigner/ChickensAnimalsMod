@@ -5,6 +5,7 @@ import chicken.creaturecorner.server.entity.obj.base.GeoTamableEntity;
 import chicken.creaturecorner.server.entity.obj.base.IAnimatedAttacker;
 import chicken.creaturecorner.server.entity.obj.base.IAnimatedEater;
 import chicken.creaturecorner.server.entity.obj.goal.AnimatedAttackGoal;
+import chicken.creaturecorner.server.entity.obj.goal.DefendFarmAnimalsGoal;
 import chicken.creaturecorner.server.entity.obj.goal.EatGrassGoal;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -17,6 +18,7 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
+import net.minecraft.world.entity.ai.goal.target.DefendVillageTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.ResetUniversalAngerTargetGoal;
@@ -60,6 +62,7 @@ public class GallianEntity extends GeoTamableEntity implements NeutralMob, IAnim
 
         this.goalSelector.addGoal(0, new FloatGoal(this));
         this.goalSelector.addGoal(1, new AnimatedAttackGoal(this, 2.5, true, 8, 7));
+        this.targetSelector.addGoal(1, new DefendFarmAnimalsGoal(this));
         this.goalSelector.addGoal(2, new MoveTowardsTargetGoal(this, 1D, 32.0F));
         this.goalSelector.addGoal(4, new FollowParentGoal(this, 1.1));
         this.goalSelector.addGoal(5, eatBlockGoal);

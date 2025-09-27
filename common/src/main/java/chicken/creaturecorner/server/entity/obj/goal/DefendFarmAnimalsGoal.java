@@ -2,6 +2,7 @@ package chicken.creaturecorner.server.entity.obj.goal;
 
 import chicken.creaturecorner.server.entity.obj.GallianEntity;
 import chicken.creaturecorner.server.entity.obj.PigeonEntity;
+import chicken.creaturecorner.util.CCTags;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.target.TargetGoal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
@@ -33,9 +34,7 @@ public class DefendFarmAnimalsGoal extends TargetGoal {
         List<? extends LivingEntity> list = this.gallian.level().getNearbyEntities(Animal.class, this.attackTargeting, this.gallian, aABB);
 
         for(LivingEntity livingEntity : list) {
-            if (livingEntity instanceof Rabbit || livingEntity instanceof Cow || livingEntity instanceof PigeonEntity || livingEntity instanceof AbstractHorse
-                || livingEntity instanceof Chicken || livingEntity instanceof Pig || livingEntity instanceof Sheep || livingEntity instanceof Goat
-                || livingEntity instanceof Sniffer){
+            if (livingEntity.getType().is(CCTags.EntityTypes.GALLIAN_DEFENDABLE) ){
 
                 if (livingEntity.getLastHurtByMob() != null){
                     this.potentialTarget = livingEntity.getLastHurtByMob();

@@ -86,7 +86,7 @@ public class GallianEggBlock extends Block {
                 if (gallian != null) {
                     Vec3 vec3 = pos.getCenter();
                     gallian.setBaby(true);
-                    gallian.tameFromHatching();
+//                    gallian.tameFromHatching();
                     gallian.moveTo(vec3.x(), vec3.y(), vec3.z(), Mth.wrapDegrees(level.random.nextFloat() * 360.0F), 0.0F);
                     level.addFreshEntity(gallian);
                 }

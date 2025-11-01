@@ -195,33 +195,27 @@ public class GallianEntity extends GeoTamableEntity implements NeutralMob, IAnim
         super.customServerAiStep();
     }
 
+    @Override
+    public void aiStep() {
+        super.aiStep();
+
+        if (!this.level().isClientSide && this.getAge()<-18000 && level().getGameTime() % 80 == 0 && !this.isTame()){
+            for (LivingEntity living : this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(10.0D, 2.0D, 10.0D))) {
+
+                if (living instanceof Player player){
+                    this.tame(player);
+                    this.level().broadcastEntityEvent(this, (byte)7);
+                    break;
+                }
+            }
+        }
+    }
+
     public void tick (){
         if (this.level().isClientSide()){
             this.setupAnimationStates();
         }
         super.tick();
-    }
-
-    public void tameFromHatching(){
-        System.out.println("Gallian has hatched!");
-        if (!this.level().isClientSide()){
-
-            System.out.println("Checking for nearby players...");
-
-            for (LivingEntity living : this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(10.0D, 2.0D, 10.0D))) {
-
-                System.out.println(living.getType());
-
-                if (living instanceof Player player){
-                    this.tame(player);
-                }
-
-                if (this.isTame()){
-                    System.out.println("Gallian has imprinted on "+living);
-                    break;
-                }
-            }
-        }
     }
 
     private void setupAnimationStates() {

@@ -51,6 +51,6 @@ public class CCColoredBlockSet {
     }
 
     private Supplier<Block> createRegistry(String color) {
-        return CCBlocks.register(name + color, blockSupplier, properties);
+        return CCBlocks.register(name + color, blockSupplier);
     }
 }

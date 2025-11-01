@@ -1,0 +1,6 @@
+{
+  "parent": "creaturecorner:block/gallian_egg",
+  "textures": {
+    "texture": "creaturecorner:block/gallian_egg_not_cracked"
+  }
+}

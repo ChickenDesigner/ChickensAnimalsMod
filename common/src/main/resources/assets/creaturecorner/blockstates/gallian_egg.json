@@ -1,0 +1,55 @@
+{
+  "variants": {
+    "hatch=0": [
+      {
+        "model": "creaturecorner:block/gallian_egg_not_cracked"
+      },
+      {
+        "model": "creaturecorner:block/gallian_egg_not_cracked",
+        "y": 90
+      },
+      {
+        "model": "creaturecorner:block/gallian_egg_not_cracked",
+        "y": 180
+      },
+      {
+        "model": "creaturecorner:block/gallian_egg_not_cracked",
+        "y": 270
+      }
+    ],
+    "hatch=1": [
+      {
+        "model": "creaturecorner:block/gallian_egg_slightly_cracked"
+      },
+      {
+        "model": "creaturecorner:block/gallian_egg_slightly_cracked",
+        "y": 90
+      },
+      {
+        "model": "creaturecorner:block/gallian_egg_slightly_cracked",
+        "y": 180
+      },
+      {
+        "model": "creaturecorner:block/gallian_egg_slightly_cracked",
+        "y": 270
+      }
+    ],
+    "hatch=2": [
+      {
+        "model": "creaturecorner:block/gallian_egg_very_cracked"
+      },
+      {
+        "model": "creaturecorner:block/gallian_egg_very_cracked",
+        "y": 90
+      },
+      {
+        "model": "creaturecorner:block/gallian_egg_very_cracked",
+        "y": 180
+      },
+      {
+        "model": "creaturecorner:block/gallian_egg_very_cracked",
+        "y": 270
+      }
+    ]
+  }
+}

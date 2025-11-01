@@ -33,6 +33,9 @@ public class CCSounds {
     public static final Supplier<SoundEvent> CARACARA_HURT = registerSoundEvents("caracara_hurt");
     public static final Supplier<SoundEvent> CARACARA_DEATH = registerSoundEvents("caracara_death");
 
+    public static final Supplier<SoundEvent> GALLIAN_EGG_CRACK = registerSoundEvents("gallian_egg_crack");
+    public static final Supplier<SoundEvent> GALLIAN_EGG_HATCH = registerSoundEvents("gallian_egg_hatch");
+
 
     private static ResourceKey<JukeboxSong> createSong(String name) {
         return ResourceKey.create(Registries.JUKEBOX_SONG, ResourceLocation.fromNamespaceAndPath(CCConstants.MOD_ID, name));

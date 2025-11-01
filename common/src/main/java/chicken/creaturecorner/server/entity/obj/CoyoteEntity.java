@@ -257,7 +257,7 @@ public class CoyoteEntity extends GeoTamableEntity implements NeutralMob {
                     this.setInSittingPose(this.isOrderedToSit());
                     this.jumping = false;
                     this.navigation.stop();
-                    this.setTarget((LivingEntity) null);
+                    this.setTarget(null);
                     return InteractionResult.SUCCESS_NO_ITEM_USED;
                 } else {
                     return interactionresult;

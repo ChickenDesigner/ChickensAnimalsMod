@@ -31,5 +31,10 @@
   "creaturecorner.sound.subtitle.coyote_hurt" : "Coyote Hurts",
   "creaturecorner.sound.subtitle.coyote_death" : "Coyote Dies",
 
+  "creaturecorner.sound.subtitle.gallian_egg_crack" : "Gallian Egg Cracks",
+  "creaturecorner.sound.subtitle.gallian_egg_hatch" : "Gallian Egg Hatches",
+
+  "block.creaturecorner.gallian_egg": "Gallian Egg",
+
   "creaturecorner.title.animal": "Creature Corner"
 }

@@ -23,12 +23,12 @@ public class CCStoneBlockSet {
     public final Supplier<Block> INFESTED_BLOCK;
 
     public CCStoneBlockSet(String name, BlockBehaviour.Properties baseBlock, Item.Properties empty) {
-        BLOCK = CCBlocks.register(name, () -> new Block(baseBlock), empty);
-        BUTTON = CCBlocks.register(name + "_button", () -> Services.GENERIC.getNewButtonBlock(BlockSetType.STONE, 20, BlockBehaviour.Properties.ofFullCopy(BLOCK.get())), empty);
-        PRESSURE_PLATE = CCBlocks.register(name + "_pressure_plate", () -> Services.GENERIC.getNewPressurePlateBlock(BlockSetType.STONE, BlockBehaviour.Properties.ofFullCopy(BLOCK.get())), empty);
-        INFESTED_BLOCK = CCBlocks.register("infested_" + name, () -> new InfestedBlock(BLOCK.get(), BlockBehaviour.Properties.ofFullCopy(BLOCK.get())), empty);
-        SLAB = CCBlocks.register(name + "_slab", () -> new SlabBlock(BlockBehaviour.Properties.ofFullCopy(BLOCK.get())), empty);
-        STAIRS = CCBlocks.register(name + "_stair", () -> Services.GENERIC.getNewStairBlock(BLOCK.get().defaultBlockState(), BlockBehaviour.Properties.ofFullCopy(BLOCK.get())), empty);
-        WALL = CCBlocks.register(name +"_wall", () -> new WallBlock(BlockBehaviour.Properties.ofFullCopy(BLOCK.get())), empty);
+        BLOCK = CCBlocks.register(name, () -> new Block(baseBlock));
+        BUTTON = CCBlocks.register(name + "_button", () -> Services.GENERIC.getNewButtonBlock(BlockSetType.STONE, 20, BlockBehaviour.Properties.ofFullCopy(BLOCK.get())));
+        PRESSURE_PLATE = CCBlocks.register(name + "_pressure_plate", () -> Services.GENERIC.getNewPressurePlateBlock(BlockSetType.STONE, BlockBehaviour.Properties.ofFullCopy(BLOCK.get())));
+        INFESTED_BLOCK = CCBlocks.register("infested_" + name, () -> new InfestedBlock(BLOCK.get(), BlockBehaviour.Properties.ofFullCopy(BLOCK.get())));
+        SLAB = CCBlocks.register(name + "_slab", () -> new SlabBlock(BlockBehaviour.Properties.ofFullCopy(BLOCK.get())));
+        STAIRS = CCBlocks.register(name + "_stair", () -> Services.GENERIC.getNewStairBlock(BLOCK.get().defaultBlockState(), BlockBehaviour.Properties.ofFullCopy(BLOCK.get())));
+        WALL = CCBlocks.register(name +"_wall", () -> new WallBlock(BlockBehaviour.Properties.ofFullCopy(BLOCK.get())));
     }
 }

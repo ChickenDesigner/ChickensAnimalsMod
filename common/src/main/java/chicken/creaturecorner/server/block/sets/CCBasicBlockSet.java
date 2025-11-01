@@ -19,8 +19,8 @@ public class CCBasicBlockSet {
     public final Supplier<Block> STAIRS;
 
     public CCBasicBlockSet(String name, BlockBehaviour.Properties baseBlock, Item.Properties empty) {
-        this.BLOCK = CCBlocks.register(name, () -> new Block(baseBlock), empty);
-        this.SLAB = CCBlocks.register(name + "_slab", () -> new SlabBlock(BlockBehaviour.Properties.ofFullCopy(BLOCK.get())), empty);
-        this.STAIRS = CCBlocks.register(name + "_stair", () -> Services.GENERIC.getNewStairBlock(BLOCK.get().defaultBlockState(), BlockBehaviour.Properties.ofFullCopy(BLOCK.get())), empty);
+        this.BLOCK = CCBlocks.register(name, () -> new Block(baseBlock));
+        this.SLAB = CCBlocks.register(name + "_slab", () -> new SlabBlock(BlockBehaviour.Properties.ofFullCopy(BLOCK.get())));
+        this.STAIRS = CCBlocks.register(name + "_stair", () -> Services.GENERIC.getNewStairBlock(BLOCK.get().defaultBlockState(), BlockBehaviour.Properties.ofFullCopy(BLOCK.get())));
     }
 }

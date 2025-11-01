@@ -65,26 +65,26 @@ public class CCWoodBlockSet {
                 SoundEvents.WOODEN_BUTTON_CLICK_ON
         );
         woodType = Services.GENERIC.getNewWoodType("newworld:" + name, woodSetType);
-        BLOCK = CCBlocks.register(name, () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PLANKS).mapColor(color)), empty);
-        SLAB = CCBlocks.register(name + "_slab", () -> new SlabBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SLAB).mapColor(color)), empty);
-        STAIRS = CCBlocks.register(name + "_stairs", () -> Services.GENERIC.getNewStairBlock(BLOCK.get().defaultBlockState(), BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_STAIRS).mapColor(color)), empty);
-        FENCE = CCBlocks.register(name + "_fence", () -> new FenceBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_FENCE).mapColor(color)), empty);
-        FENCE_GATE = CCBlocks.register(name + "_fence_gate", () -> new FenceGateBlock(woodType, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_FENCE_GATE).mapColor(color)), empty);
-        STRIPPED_LOG = CCBlocks.register("stripped_" + name + "_log", () -> new RotatedPillarBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.STRIPPED_OAK_LOG).mapColor(color)), empty);
-        LOG = CCBlocks.register(name + "_log", () -> new RotatedPillarBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_LOG).mapColor(color)), empty);
-        WOOD = CCBlocks.register(name + "_wood", () -> new RotatedPillarBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_WOOD).mapColor(color)), empty);
-        STRIPPED_WOOD = CCBlocks.register("stripped_" + name + "_wood", () -> new RotatedPillarBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.STRIPPED_OAK_WOOD).mapColor(color)), empty);
-        DOOR = CCBlocks.register(name + "_door", () -> Services.GENERIC.getNewDoorBlock(woodSetType,BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_DOOR).mapColor(color)), empty);
-        BUTTON = CCBlocks.register(name + "_button", () -> Services.GENERIC.getNewButtonBlock(woodSetType, 30, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_BUTTON).mapColor(color)), empty);
-        PRESSURE_PLATE = CCBlocks.register(name + "_pressure_plate", () -> Services.GENERIC.getNewPressurePlateBlock(woodSetType, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PRESSURE_PLATE).mapColor(color)), empty);
+        BLOCK = CCBlocks.register(name, () -> new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PLANKS).mapColor(color)));
+        SLAB = CCBlocks.register(name + "_slab", () -> new SlabBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SLAB).mapColor(color)) );
+        STAIRS = CCBlocks.register(name + "_stairs", () -> Services.GENERIC.getNewStairBlock(BLOCK.get().defaultBlockState(), BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_STAIRS).mapColor(color)) );
+        FENCE = CCBlocks.register(name + "_fence", () -> new FenceBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_FENCE).mapColor(color)) );
+        FENCE_GATE = CCBlocks.register(name + "_fence_gate", () -> new FenceGateBlock(woodType, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_FENCE_GATE).mapColor(color)) );
+        STRIPPED_LOG = CCBlocks.register("stripped_" + name + "_log", () -> new RotatedPillarBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.STRIPPED_OAK_LOG).mapColor(color)) );
+        LOG = CCBlocks.register(name + "_log", () -> new RotatedPillarBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_LOG).mapColor(color)) );
+        WOOD = CCBlocks.register(name + "_wood", () -> new RotatedPillarBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_WOOD).mapColor(color)) );
+        STRIPPED_WOOD = CCBlocks.register("stripped_" + name + "_wood", () -> new RotatedPillarBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.STRIPPED_OAK_WOOD).mapColor(color)) );
+        DOOR = CCBlocks.register(name + "_door", () -> Services.GENERIC.getNewDoorBlock(woodSetType,BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_DOOR).mapColor(color)) );
+        BUTTON = CCBlocks.register(name + "_button", () -> Services.GENERIC.getNewButtonBlock(woodSetType, 30, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_BUTTON).mapColor(color)) );
+        PRESSURE_PLATE = CCBlocks.register(name + "_pressure_plate", () -> Services.GENERIC.getNewPressurePlateBlock(woodSetType, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PRESSURE_PLATE).mapColor(color)) );
         SIGN = CCBlocks.registerNoItem(name + "_sign", () -> new CCStandingSignBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SIGN).mapColor(color), woodType));
-        TRAPDOOR = CCBlocks.register(name + "_trapdoor", () -> Services.GENERIC.getNewTrapdoorBlock(woodSetType, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_TRAPDOOR).mapColor(color)), empty);
+        TRAPDOOR = CCBlocks.register(name + "_trapdoor", () -> Services.GENERIC.getNewTrapdoorBlock(woodSetType, BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_TRAPDOOR).mapColor(color)) );
         WALL_SIGN = CCBlocks.registerNoItem(name + "_wall_sign", () -> new CCWallSignBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_WALL_SIGN).mapColor(color), woodType));
         HANGING_SIGN = CCBlocks.registerNoItem(name + "_hanging_sign", () -> new CCCeilingHangingSignBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_HANGING_SIGN).mapColor(color), woodType));
         HANGING_SIGN_WALL = CCBlocks.registerNoItem(name + "_hanging_wall_sign", () -> new CCWallHangingSignBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_WALL_HANGING_SIGN).mapColor(color), woodType));
-        LEAVES = CCBlocks.register(name + "_leaves", CCWoodBlockSet::leaves, empty);
+        LEAVES = CCBlocks.register(name + "_leaves", CCWoodBlockSet::leaves );
         SIGN_ITEM = CCItems.register(name + "_sign_item", () -> new SignItem(empty, SIGN.get(), WALL_SIGN.get()));
-        HANGING_SIGN_ITEM = CCItems.register(name + "_hanging_sign_item", () -> new HangingSignItem(HANGING_SIGN.get(), HANGING_SIGN_WALL.get(), empty));
+        HANGING_SIGN_ITEM = CCItems.register(name + "_hanging_sign_item", () -> new HangingSignItem(HANGING_SIGN.get(), HANGING_SIGN_WALL.get(), empty ));
     }
 
     public static Block leaves() {

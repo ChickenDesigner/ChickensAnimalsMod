@@ -1,15 +1,11 @@
 package chicken.creaturecorner.server.entity.obj.goal;
 
 import chicken.creaturecorner.server.entity.obj.GallianEntity;
-import chicken.creaturecorner.server.entity.obj.PigeonEntity;
 import chicken.creaturecorner.util.CCTags;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.target.TargetGoal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.animal.*;
-import net.minecraft.world.entity.animal.goat.Goat;
-import net.minecraft.world.entity.animal.horse.AbstractHorse;
-import net.minecraft.world.entity.animal.sniffer.Sniffer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;

@@ -614,4 +614,16 @@ public class PigeonEntity extends GeoEntityBase {
         this.playSound(CCSounds.PIGEON_FLAP.get(), 0.15F, 1.0F);
     }
 
+    @Override
+    public float getWalkTargetValue(BlockPos pPos, LevelReader pLevel) {
+        if (this.isFlying())
+            return this.getDepthPathfindingFavor(pPos, pLevel);
+        else
+            return super.getWalkTargetValue(pPos, pLevel);
+    }
+
+    float getDepthPathfindingFavor(BlockPos pos, LevelReader world) {
+        int y = pos.getY() + Math.abs(world.getSeaLevel()) + 70;
+        return 1f / (y < 0 ? 1 : y);
+    }
 }

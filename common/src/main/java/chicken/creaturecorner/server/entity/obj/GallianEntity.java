@@ -7,17 +7,17 @@ import chicken.creaturecorner.server.entity.obj.base.IAnimatedEater;
 import chicken.creaturecorner.server.entity.obj.goal.AnimatedAttackGoal;
 import chicken.creaturecorner.server.entity.obj.goal.DefendFarmAnimalsGoal;
 import chicken.creaturecorner.server.entity.obj.goal.EatGrassGoal;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.util.TimeUtil;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -25,35 +25,52 @@ import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.ResetUniversalAngerTargetGoal;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.animal.Fox;
+import net.minecraft.world.entity.animal.Pufferfish;
 import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.animation.AnimatableManager;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 public class GallianEntity extends GeoTamableEntity implements NeutralMob, IAnimatedAttacker, IAnimatedEater {
 
     public final AnimationState attackAnimationState = new AnimationState();
     public final AnimationState idleAnimationState = new AnimationState();
+    public final AnimationState squintAnimationState = new AnimationState();
     public final AnimationState idleBlinkAnimationState = new AnimationState();
     public final AnimationState peckAnimationState = new AnimationState();
     public int attackAnimationTimeout;
     private int idleBlinkTimeout;
     private int peckTimeout;
+    private boolean isSquinting;
     
     private static final UniformInt PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
     private UUID persistentAngerTarget;
     private static final EntityDataAccessor<Integer> DATA_REMAINING_ANGER_TIME = SynchedEntityData.defineId(GallianEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> ATTACKING = SynchedEntityData.defineId(GallianEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> IS_EATING = SynchedEntityData.defineId(GallianEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> IS_SQUINTING = SynchedEntityData.defineId(GallianEntity.class, EntityDataSerializers.BOOLEAN);
+
+    private final Predicate<LivingEntity> SCARY_MOB = (pEntity) -> {
+
+        if (pEntity instanceof Player player) {
+            return !player.isCreative() && (this.isTame() && this.getOwner() != player);
+        }
+
+        return pEntity instanceof Player;
+    };
+
+    final TargetingConditions targetingConditions= TargetingConditions.forNonCombat().ignoreInvisibilityTesting().ignoreLineOfSight().selector(this.SCARY_MOB);
+
 
     public GallianEntity(EntityType<? extends GeoTamableEntity> entityType, Level level) {
         super(entityType, level);
@@ -84,6 +101,18 @@ public class GallianEntity extends GeoTamableEntity implements NeutralMob, IAnim
         this.targetSelector.addGoal(8, new ResetUniversalAngerTargetGoal<>(this, true));
     }
 
+    public void onSyncedDataUpdated(EntityDataAccessor<?> pKey) {
+        this.refreshDimensions();
+        super.onSyncedDataUpdated(pKey);
+    }
+
+    private static final EntityDimensions BABY_DIMENSIONS = CCEntities.GALLIAN.get().getDimensions().scale(0.5f, 0.3f).withEyeHeight(0.65F);
+
+    @Override
+    protected EntityDimensions getDefaultDimensions(Pose pose) {
+        return this.isBaby() ?  BABY_DIMENSIONS : super.getDefaultDimensions(pose);
+    }
+
     public static AttributeSupplier.Builder createAttributes() {
         return Mob.createMobAttributes().add(Attributes.STEP_HEIGHT, 1.0F)
                 .add(Attributes.ATTACK_DAMAGE, 6.0F)
@@ -97,6 +126,7 @@ public class GallianEntity extends GeoTamableEntity implements NeutralMob, IAnim
         builder.define(DATA_REMAINING_ANGER_TIME, 0);
         builder.define(ATTACKING, false);
         builder.define(IS_EATING, false);
+        builder.define(IS_SQUINTING, false);
     }
 
     @Override
@@ -130,6 +160,14 @@ public class GallianEntity extends GeoTamableEntity implements NeutralMob, IAnim
 
     public void setEating(boolean attacking) {
         this.entityData.set(IS_EATING, attacking);
+    }
+
+    public void setIsSquinting(boolean isSquinting){
+        this.entityData.set(IS_SQUINTING, isSquinting);
+    }
+
+    public boolean isSquinting(){
+        return this.entityData.get(IS_SQUINTING);
     }
 
     @Override
@@ -199,13 +237,38 @@ public class GallianEntity extends GeoTamableEntity implements NeutralMob, IAnim
     public void aiStep() {
         super.aiStep();
 
-        if (!this.level().isClientSide && this.getAge()<-18000 && level().getGameTime() % 80 == 0 && !this.isTame()){
-            for (LivingEntity living : this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(10.0D, 2.0D, 10.0D))) {
+        if (!this.level().isClientSide){
+            if (this.getAge()<-18000 && level().getGameTime() % 80 == 0 && !this.isTame()){
+                for (LivingEntity living : this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(10.0D, 2.0D, 10.0D))) {
 
-                if (living instanceof Player player){
-                    this.tame(player);
-                    this.level().broadcastEntityEvent(this, (byte)7);
-                    break;
+                    if (living instanceof Player player){
+                        this.tame(player);
+                        this.level().broadcastEntityEvent(this, (byte)7);
+                        break;
+                    }
+                }
+            }
+
+            if (!this.isBaby() && level().getGameTime() % 80 == 0){
+
+                for (LivingEntity living : this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(25.0D, 10.0D, 25.0D))) {
+
+                    this.setIsSquinting(false);
+
+                    if (living instanceof Player player){
+
+                        if (player.isCreative()){
+                            this.setIsSquinting(false);
+                            break;
+                        }
+
+                        if (this.isTame()){
+                            this.setIsSquinting(this.getOwner()!=player);
+                        }else {
+                            this.setIsSquinting(true);
+                        }
+                        break;
+                    }
                 }
             }
         }
@@ -215,6 +278,7 @@ public class GallianEntity extends GeoTamableEntity implements NeutralMob, IAnim
         if (this.level().isClientSide()){
             this.setupAnimationStates();
         }
+
         super.tick();
     }
 
@@ -229,7 +293,8 @@ public class GallianEntity extends GeoTamableEntity implements NeutralMob, IAnim
             --this.idleBlinkTimeout;
         }
 
-        
+        this.squintAnimationState.animateWhen(this.isAlive() && this.isSquinting(), this.tickCount);
+
         if(this.isAttacking() && attackAnimationTimeout <= 0) {
             attackAnimationTimeout = 15;
             attackAnimationState.start(this.tickCount);
@@ -260,22 +325,6 @@ public class GallianEntity extends GeoTamableEntity implements NeutralMob, IAnim
 
     public boolean isWithinMeleeAttackRange(LivingEntity entity) {
         return this.getAttackBoundingBox().intersects(this.getTargetHitbox(entity));
-    }
-
-    public InteractionResult mobInteract(Player player, InteractionHand hand) {
-
-        if (this.isTame()) {
-                InteractionResult interactionresult = super.mobInteract(player, hand);
-                if (!interactionresult.consumesAction() && this.isOwnedBy(player)) {
-                    System.out.println("Mob is owned by "+this.getOwnerUUID());
-                    return InteractionResult.SUCCESS_NO_ITEM_USED;
-                } else {
-                    return interactionresult;
-                }
-        }
-        else {
-            return super.mobInteract(player, hand);
-        }
     }
 
     @Override

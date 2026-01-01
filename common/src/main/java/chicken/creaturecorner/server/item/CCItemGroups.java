@@ -15,6 +15,9 @@ public class CCItemGroups {
     public static final Supplier<CreativeModeTab> dev_tab = register(
             "animal_tab", () -> Services.GENERIC.createTab(CCItems.PIGEON_EGG.get().getDefaultInstance(),
                     (var1, output) -> {
+
+                        output.accept(CCBlocks.PIGEON_LOFT.get());
+
                         output.accept(CCItems.GALLIAN_GROTTO_DISC.get());
                         output.accept(CCBlocks.GALLIAN_EGG.get());
 

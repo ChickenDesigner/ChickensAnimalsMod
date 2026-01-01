@@ -1,6 +1,6 @@
 package chicken.creaturecorner.server.entity.obj.base.goal;
 
-import chicken.creaturecorner.server.entity.obj.base.GeoEntityBase;
+import chicken.creaturecorner.server.entity.obj.base.AbstractCornerCreature;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -10,10 +10,10 @@ import java.util.List;
 import java.util.function.Predicate;
 
 public class LookForFoodGoal extends Goal {
-    private final GeoEntityBase base;
+    private final AbstractCornerCreature base;
     private final TagKey<Item> tags;
     private ItemEntity itemPos;
-    public LookForFoodGoal(GeoEntityBase base, TagKey<Item> tags) {
+    public LookForFoodGoal(AbstractCornerCreature base, TagKey<Item> tags) {
         this.base = base;
         this.tags = tags;
     }

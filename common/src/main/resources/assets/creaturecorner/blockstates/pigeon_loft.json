@@ -1,0 +1,448 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_loft/pigeon_loft_bottom",
+        "uvlock": true
+      },
+      "when": {
+        "down": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_loft/pigeon_loft_top",
+        "uvlock": true
+      },
+      "when": {
+        "up": "false"
+      }
+    },
+
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_loft/pigeon_loft_front"
+      },
+      "when": {
+        "facing": "north",
+        "north": "false",
+        "down": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_loft/pigeon_loft_front",
+        "y": -90
+      },
+      "when": {
+        "facing": "west",
+        "west": "false",
+        "down": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_loft/pigeon_loft_front",
+        "y": 180
+      },
+      "when": {
+        "facing": "south",
+        "south": "false",
+        "down": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_loft/pigeon_loft_front",
+        "y": 90
+      },
+      "when": {
+        "facing": "east",
+        "east": "false",
+        "down": "false"
+      }
+    },
+
+
+
+
+
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_loft/pigeon_loft_side"
+      },
+      "when": {
+        "facing": "north",
+        "north": "false",
+        "down": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_loft/pigeon_loft_side",
+        "y": -90
+      },
+      "when": {
+        "facing": "west",
+        "west": "false",
+        "down": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_loft/pigeon_loft_side",
+        "y": 180
+      },
+      "when": {
+        "facing": "south",
+        "south": "false",
+        "down": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_loft/pigeon_loft_side",
+        "y": 90
+      },
+      "when": {
+        "facing": "east",
+        "east": "false",
+        "down": "true"
+      }
+    },
+
+
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_loft/pigeon_loft_side"
+      },
+      "when": {
+        "facing": "west",
+        "north": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_loft/pigeon_loft_side"
+      },
+      "when": {
+        "facing": "east",
+        "north": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_loft/pigeon_loft_side"
+      },
+      "when": {
+        "facing": "south",
+        "north": "false"
+      }
+    },
+
+
+
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_loft/pigeon_loft_side",
+        "y": -90
+      },
+      "when": {
+        "facing": "north",
+        "west": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_loft/pigeon_loft_side",
+        "y": -90
+      },
+      "when": {
+        "facing": "south",
+        "west": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_loft/pigeon_loft_side",
+        "y": -90
+      },
+      "when": {
+        "facing": "east",
+        "west": "false"
+      }
+    },
+
+
+
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_loft/pigeon_loft_side",
+        "y": 180
+      },
+      "when": {
+        "facing": "east",
+        "south": "false"
+      }
+    },{
+      "apply": {
+        "model": "creaturecorner:block/pigeon_loft/pigeon_loft_side",
+        "y": 180
+      },
+      "when": {
+        "facing": "west",
+        "south": "false"
+      }
+    },{
+      "apply": {
+        "model": "creaturecorner:block/pigeon_loft/pigeon_loft_side",
+        "y": 180
+      },
+      "when": {
+        "facing": "north",
+        "south": "false"
+      }
+    },
+
+
+
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_loft/pigeon_loft_side",
+        "y": 90
+      },
+      "when": {
+        "facing": "south",
+        "east": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_loft/pigeon_loft_side",
+        "y": 90
+      },
+      "when": {
+        "facing": "west",
+        "east": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_loft/pigeon_loft_side",
+        "y": 90
+      },
+      "when": {
+        "facing": "north",
+        "east": "false"
+      }
+    },
+
+
+
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_loft/pigeon_loft_side_bottom"
+      },
+      "when": {
+        "down": "true",
+        "north": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_loft/pigeon_loft_side_bottom",
+        "y": 90
+      },
+      "when": {
+        "down": "true",
+        "east": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_loft/pigeon_loft_side_bottom",
+        "y": -90
+      },
+      "when": {
+        "down": "true",
+        "west": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_loft/pigeon_loft_side_bottom",
+        "y": 180
+      },
+      "when": {
+        "down": "true",
+        "south": "false"
+      }
+    },
+
+
+
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_loft/pigeon_loft_side_top"
+      },
+      "when": {
+        "up": "true",
+        "north": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_loft/pigeon_loft_side_top",
+        "y": -90
+      },
+      "when": {
+        "up": "true",
+        "west": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_loft/pigeon_loft_side_top",
+        "y": 90
+      },
+      "when": {
+        "up": "true",
+        "east": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_loft/pigeon_loft_side_top",
+        "y": 180
+      },
+      "when": {
+        "up": "true",
+        "south": "false"
+      }
+    },
+
+
+
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_loft/pigeon_loft_side_left"
+      },
+      "when": {
+        "east": "true",
+        "north": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_loft/pigeon_loft_side_left",
+        "y": 90
+      },
+      "when": {
+        "south": "true",
+        "east": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_loft/pigeon_loft_side_left",
+        "y": 180
+      },
+      "when": {
+        "west": "true",
+        "south": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_loft/pigeon_loft_side_left",
+        "y": -90
+      },
+      "when": {
+        "north": "true",
+        "west": "false"
+      }
+    },
+
+
+
+
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_loft/pigeon_loft_side_right"
+      },
+      "when": {
+        "west": "true",
+        "north": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_loft/pigeon_loft_side_right",
+        "y": 90
+      },
+      "when": {
+        "north": "true",
+        "east": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_loft/pigeon_loft_side_right",
+        "y": 180
+      },
+      "when": {
+        "east": "true",
+        "south": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_loft/pigeon_loft_side_right",
+        "y": -90
+      },
+      "when": {
+        "south": "true",
+        "west": "false"
+      }
+    },
+
+
+
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_loft/pigeon_loft_post"
+      },
+      "when": {
+        "facing": "south"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_loft/pigeon_loft_post"
+      },
+      "when": {
+        "facing": "north"
+      }
+    },
+
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_loft/pigeon_loft_post",
+        "y": 90
+      },
+      "when": {
+        "facing": "east"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_loft/pigeon_loft_post",
+        "y": 90
+      },
+      "when": {
+        "facing": "west"
+      }
+    }
+
+  ]
+}

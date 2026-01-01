@@ -1,0 +1,25 @@
+{
+	"format_version": "1.9.0",
+	"credit": "Made with Blockbench",
+	"render_type": "translucent",
+	"textures": {
+		"0": "creaturecorner:block/pigeon_loft/pigeon_loft_side_full",
+		"particle": "creaturecorner:block/pigeon_loft/pigeon_loft_side_full"
+	},
+	"elements": [
+		{
+			"name": "front",
+			"from": [1, 15, 1],
+			"to": [15, 16, 1],
+			"rotation": {"angle": 0, "axis": "y", "origin": [1, 15, 6]},
+			"faces": {
+				"north": {"uv": [1, 0, 15, 1], "texture": "#0"},
+				"east": {"uv": [0, 0, 0, 11], "texture": "#0"},
+				"south": {"uv": [1, 0, 15, 1], "texture": "#0"},
+				"west": {"uv": [0, 0, 0, 11], "texture": "#0"},
+				"up": {"uv": [0, 0, 14, 0], "texture": "#0"},
+				"down": {"uv": [0, 0, 14, 0], "texture": "#0"}
+			}
+		}
+	]
+}

@@ -11,10 +11,10 @@ import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
-public abstract class GeoEntityBase extends Animal implements GeoEntity {
+public abstract class AbstractCornerCreature extends Animal implements GeoEntity {
     private final AnimatableInstanceCache geoCache = GeckoLibUtil.createInstanceCache(this);
-    protected static final EntityDataAccessor<Integer> FOOD_LEVEL = SynchedEntityData.defineId(GeoEntityBase.class, EntityDataSerializers.INT);
-    public GeoEntityBase(EntityType<? extends Animal> entityType, Level level) {
+    protected static final EntityDataAccessor<Integer> FOOD_LEVEL = SynchedEntityData.defineId(AbstractCornerCreature.class, EntityDataSerializers.INT);
+    public AbstractCornerCreature(EntityType<? extends Animal> entityType, Level level) {
         super(entityType, level);
     }
 

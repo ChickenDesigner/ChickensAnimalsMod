@@ -1,9 +1,7 @@
-package chicken.creaturecorner.client.renderer.obj;
+package chicken.creaturecorner.client.renderer.geckolib;
 
 import chicken.creaturecorner.client.model.NewPigeonModel;
-import chicken.creaturecorner.client.model.PigeonModel;
 import chicken.creaturecorner.server.entity.obj.NewPigeonEntity;
-import chicken.creaturecorner.server.entity.obj.PigeonEntity;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import software.bernie.geckolib.renderer.GeoEntityRenderer;
 

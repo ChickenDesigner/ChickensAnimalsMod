@@ -1,0 +1,6 @@
+{
+  "parent": "creaturecorner:block/pigeon_loft/pigeon_loft_side_base",
+  "textures": {
+    "texture": "creaturecorner:block/pigeon_loft/pigeon_loft_front_full"
+  }
+}

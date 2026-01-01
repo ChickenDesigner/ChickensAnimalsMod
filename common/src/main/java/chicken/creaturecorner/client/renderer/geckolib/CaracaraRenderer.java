@@ -1,4 +1,4 @@
-package chicken.creaturecorner.client.renderer.obj;
+package chicken.creaturecorner.client.renderer.geckolib;
 
 import chicken.creaturecorner.client.model.CaracaraModel;
 import chicken.creaturecorner.server.entity.obj.CaracaraEntity;

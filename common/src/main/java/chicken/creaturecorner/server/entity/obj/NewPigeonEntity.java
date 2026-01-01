@@ -5,7 +5,7 @@ import chicken.creaturecorner.server.entity.obj.control.AnimalFlyingMoveControl;
 import chicken.creaturecorner.server.entity.obj.control.AnimalMoveControl;
 import chicken.creaturecorner.server.entity.obj.control.FlyingAnimalNavigation;
 import chicken.creaturecorner.server.entity.obj.control.GroundAnimalNavigation;
-import chicken.creaturecorner.server.entity.obj.base.GeoEntityBase;
+import chicken.creaturecorner.server.entity.obj.base.AbstractCornerCreature;
 import chicken.creaturecorner.server.sound.CCSounds;
 import com.mojang.datafixers.DataFixUtils;
 import lombok.Getter;
@@ -49,7 +49,7 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-public class NewPigeonEntity extends GeoEntityBase {
+public class NewPigeonEntity extends AbstractCornerCreature {
     public NewPigeonEntity leader;
     private int schoolSize = 1;
     @Getter

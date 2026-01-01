@@ -1,6 +1,6 @@
 package chicken.creaturecorner.server.entity.obj.control;
 
-import chicken.creaturecorner.server.entity.obj.base.GeoEntityBase;
+import chicken.creaturecorner.server.entity.obj.base.AbstractCornerCreature;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 
@@ -8,7 +8,7 @@ public class AnimalFlyingMoveControl extends AnimalMoveControl {
     private final int maxTurn;
     private final boolean hoversInPlace;
 
-    public AnimalFlyingMoveControl(GeoEntityBase mob, int turn, boolean hoversInPlace) {
+    public AnimalFlyingMoveControl(AbstractCornerCreature mob, int turn, boolean hoversInPlace) {
         super(mob, turn);
         this.maxTurn = turn;
         this.hoversInPlace = hoversInPlace;

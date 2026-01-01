@@ -28,7 +28,7 @@ import net.minecraft.world.scores.PlayerTeam;
 import java.util.Optional;
 import java.util.UUID;
 
-public abstract class GeoTamableEntity extends GeoEntityBase implements OwnableEntity {
+public abstract class GeoTamableEntity extends AbstractCornerCreature implements OwnableEntity {
     public static final int TELEPORT_WHEN_DISTANCE_IS_SQ = 144;
     private static final int MIN_HORIZONTAL_DISTANCE_FROM_TARGET_AFTER_TELEPORTING = 2;
     private static final int MAX_HORIZONTAL_DISTANCE_FROM_TARGET_AFTER_TELEPORTING = 3;

@@ -2,9 +2,8 @@ package chicken.creaturecorner.server.entity.obj;
 
 
 import chicken.creaturecorner.server.entity.CCEntities;
-import chicken.creaturecorner.server.entity.obj.base.GeoEntityBase;
+import chicken.creaturecorner.server.entity.obj.base.AbstractCornerCreature;
 import chicken.creaturecorner.server.entity.obj.goal.PigeonFlockFollowLeader;
-import chicken.creaturecorner.server.entity.obj.goal.PigeonPanicGoal;
 import chicken.creaturecorner.server.sound.CCSounds;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.core.BlockPos;
@@ -35,6 +34,7 @@ import net.minecraft.world.entity.ai.util.LandRandomPos;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.Cat;
 import net.minecraft.world.entity.animal.Ocelot;
+import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -58,7 +58,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class PigeonEntity extends GeoEntityBase {
+public class PigeonEntity extends AbstractCornerCreature {
+
+    public final net.minecraft.world.entity.AnimationState idleAnimationState = new net.minecraft.world.entity.AnimationState();
+
     public PigeonEntity leader;
     private int schoolSize = 1;
     private boolean wantsToFly;
@@ -80,16 +83,30 @@ public class PigeonEntity extends GeoEntityBase {
         this.wantsToFly = false;
     }
 
+    public void customServerAiStep() {
+        if (this.getMoveControl().hasWanted()) {
+            double d0 = this.getMoveControl().getSpeedModifier();
+            this.setPose(Pose.STANDING);
+            this.setSprinting(d0 >= 1.1D);
+        } else {
+            this.setPose(Pose.STANDING);
+            this.setSprinting(false);
+        }
+
+        super.customServerAiStep();
+    }
+
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new FloatGoal(this));
-        this.goalSelector.addGoal(1, new PigeonPanicGoal(this));
+        this.goalSelector.addGoal(1, new PanicGoal(this, 1.5D));
         this.goalSelector.addGoal(3, new PigeonFlockFollowLeader(this));
         this.goalSelector.addGoal(4, new PigeonWaterAvoidingRandomStrollGoal(this, 1.0F));
 
-        this.goalSelector.addGoal(3, new AvoidEntityGoal<>(this, Ocelot.class, 6.0F, 1.0, 1.2));
-        this.goalSelector.addGoal(3, new AvoidEntityGoal<>(this, Cat.class, 6.0F, 1.0, 1.2));
-        this.goalSelector.addGoal(3, new AvoidEntityGoal<>(this, CoyoteEntity.class, 6.0F, 1.0, 1.2));
+        this.goalSelector.addGoal(3, new AvoidEntityGoal<>(this, LivingEntity.class, 6.0F, 1, 1.5D,
+                (entity) ->
+                        entity instanceof Wolf || entity instanceof Ocelot || entity instanceof Cat || entity instanceof CoyoteEntity
+        ));
 
         this.goalSelector.addGoal(2, new BreedGoal(this, 1, PigeonEntity.class));
         this.goalSelector.addGoal(8, new PigeonFlyGoal());
@@ -267,12 +284,17 @@ public class PigeonEntity extends GeoEntityBase {
 
     @Override
     public void tick() {
+        if (this.level().isClientSide()){
+            this.setupAnimationStates();
+        }
+
         super.tick();
 
         if (this.isFlying() && !this.onGround()){
             if (this.random.nextInt(10)==0){
                 if (!findGroundPosition()){
                     this.setFlyTicks(0);
+                    this.moveDown();
                 }
             }
         }
@@ -320,6 +342,10 @@ public class PigeonEntity extends GeoEntityBase {
                 this.schoolSize = 1;
             }
         }
+    }
+
+    private void setupAnimationStates() {
+        this.idleAnimationState.animateWhen(this.isAlive(), this.tickCount);
     }
 
 
@@ -573,7 +599,7 @@ public class PigeonEntity extends GeoEntityBase {
     }
 
     private void moveDown(){
-        this.getNavigation().moveTo(this.getX(), this.getY() - 8.0D, this.getZ(), 1.1D);
+        this.setDeltaMovement(0, -1, 0);
     }
 
     private boolean isAir(LevelReader pLevel, BlockPos pPos) {

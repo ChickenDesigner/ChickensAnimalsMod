@@ -2,7 +2,7 @@ package chicken.creaturecorner.server.entity.obj;
 
 import chicken.creaturecorner.server.entity.CCEntities;
 import chicken.creaturecorner.server.entity.obj.control.AnimalMoveControl;
-import chicken.creaturecorner.server.entity.obj.base.GeoEntityBase;
+import chicken.creaturecorner.server.entity.obj.base.AbstractCornerCreature;
 import chicken.creaturecorner.server.entity.obj.base.goal.LookForFoodGoal;
 import chicken.creaturecorner.server.sound.CCSounds;
 import net.minecraft.core.BlockPos;
@@ -53,7 +53,7 @@ import java.util.function.Predicate;
 
 //todo: make caracaras not touch the floor while moving and flying, if their navigation is done then don't make them not touch the floor.
 
-public class CaracaraEntity extends GeoEntityBase implements NeutralMob {
+public class CaracaraEntity extends AbstractCornerCreature implements NeutralMob {
     private static final UniformInt PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
     
     private UUID persistentAngerTarget;

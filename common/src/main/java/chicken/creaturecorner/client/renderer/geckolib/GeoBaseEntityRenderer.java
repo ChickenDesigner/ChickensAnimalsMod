@@ -1,8 +1,8 @@
-package chicken.creaturecorner.client.renderer.obj;
+package chicken.creaturecorner.client.renderer.geckolib;
 
 import chicken.creaturecorner.CCConstants;
 import chicken.creaturecorner.server.entity.obj.EntityHolder;
-import chicken.creaturecorner.server.entity.obj.base.GeoEntityBase;
+import chicken.creaturecorner.server.entity.obj.base.AbstractCornerCreature;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import software.bernie.geckolib.model.GeoModel;
@@ -10,16 +10,16 @@ import software.bernie.geckolib.renderer.GeoEntityRenderer;
 
 import java.util.Objects;
 
-public class GeoBaseEntityRenderer extends GeoEntityRenderer<GeoEntityBase> {
+public class GeoBaseEntityRenderer extends GeoEntityRenderer<AbstractCornerCreature> {
     @Override
-    public float getMotionAnimThreshold(GeoEntityBase animatable) {
+    public float getMotionAnimThreshold(AbstractCornerCreature animatable) {
         return 0.005F;
     }
 
     public GeoBaseEntityRenderer(EntityRendererProvider.Context renderManager, EntityHolder<?> entityHolder) {
         super(renderManager, new GeoModel<>() {
             @Override
-            public ResourceLocation getModelResource(GeoEntityBase animatable) {
+            public ResourceLocation getModelResource(AbstractCornerCreature animatable) {
                 String entityName = entityHolder.name();
                 if (animatable.hasChildModel() && animatable.isBaby()) {
                     return ResourceLocation.fromNamespaceAndPath(CCConstants.MOD_ID, "geo/animal/" + entityName + "/" + entityName + "_baby.geo.json");
@@ -29,7 +29,7 @@ public class GeoBaseEntityRenderer extends GeoEntityRenderer<GeoEntityBase> {
             }
 
             @Override
-            public ResourceLocation getTextureResource(GeoEntityBase animatable) {
+            public ResourceLocation getTextureResource(AbstractCornerCreature animatable) {
                 String entityName = entityHolder.name();
                 String variantName = animatable.getVariantName();
                 if (!Objects.equals(variantName, "")) {
@@ -44,7 +44,7 @@ public class GeoBaseEntityRenderer extends GeoEntityRenderer<GeoEntityBase> {
             }
 
             @Override
-            public ResourceLocation getAnimationResource(GeoEntityBase animatable) {
+            public ResourceLocation getAnimationResource(AbstractCornerCreature animatable) {
                 String entityName = entityHolder.name();
                 if (animatable.hasChildModel() && animatable.isBaby()) {
                     return ResourceLocation.fromNamespaceAndPath(CCConstants.MOD_ID, "animations/animal/" + entityName + "/" + entityName + "_baby.animation.json");

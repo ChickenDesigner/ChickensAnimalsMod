@@ -1,6 +1,5 @@
-package chicken.creaturecorner.client.renderer.obj;
+package chicken.creaturecorner.client.renderer.mob;
 
-import chicken.creaturecorner.CCCommon;
 import chicken.creaturecorner.CCConstants;
 import chicken.creaturecorner.client.CCModelLayers;
 import chicken.creaturecorner.client.model.GallianChickModel;

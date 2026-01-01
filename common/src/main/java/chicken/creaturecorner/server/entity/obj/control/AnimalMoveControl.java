@@ -1,6 +1,6 @@
 package chicken.creaturecorner.server.entity.obj.control;
 
-import chicken.creaturecorner.server.entity.obj.base.GeoEntityBase;
+import chicken.creaturecorner.server.entity.obj.base.AbstractCornerCreature;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
@@ -125,7 +125,7 @@ public class AnimalMoveControl extends MoveControl {
         BlockPos blockPos = this.mob.blockPosition();
         BlockState blockState = this.mob.level().getBlockState(blockPos);
         VoxelShape shape = blockState.getCollisionShape(this.mob.level(), blockPos);
-        GeoEntityBase base = (GeoEntityBase) mob;
+        AbstractCornerCreature base = (AbstractCornerCreature) mob;
         double size = base.getDimensions(null).width() + 0.1;
         return (dY > this.mob.maxUpStep() && dX *dX + dZ * dZ <= size)
                 || (!shape.isEmpty() && this.mob.getY() < shape.max(Direction.Axis.Y) + blockPos.getY() && !blockState.is(BlockTags.DOORS) && !blockState.is(BlockTags.FENCES) && !blockState.is(BlockTags.FENCE_GATES));

@@ -2,6 +2,7 @@ package chicken.creaturecorner.server.block;
 
 import chicken.creaturecorner.platform.Services;
 import chicken.creaturecorner.server.block.obj.custom.GallianEggBlock;
+import chicken.creaturecorner.server.block.obj.custom.PigeonLoftBlock;
 import chicken.creaturecorner.server.item.CCItems;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
@@ -18,6 +19,9 @@ public class CCBlocks {
 
     public static final Supplier<Block> GALLIAN_EGG = register("gallian_egg",
             () -> new GallianEggBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.TURTLE_EGG)));
+
+    public static final Supplier<Block> PIGEON_LOFT = register("pigeon_loft",
+            () -> new PigeonLoftBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PLANKS).noOcclusion()));
 
 
     public static Supplier<Block> register(String s, Supplier<Block> block) {

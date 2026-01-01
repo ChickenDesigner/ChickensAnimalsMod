@@ -1,6 +1,6 @@
 package chicken.creaturecorner.server.entity.obj.goal;
 
-import chicken.creaturecorner.server.entity.obj.base.GeoEntityBase;
+import chicken.creaturecorner.server.entity.obj.base.AbstractCornerCreature;
 import chicken.creaturecorner.server.entity.obj.base.IAnimatedEater;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -17,13 +17,13 @@ import java.util.function.Predicate;
 public class EatGrassGoal extends Goal {
 
     private static final Predicate<BlockState> IS_TALL_GRASS = BlockStatePredicate.forBlock(Blocks.SHORT_GRASS);
-    private final GeoEntityBase mob;
+    private final AbstractCornerCreature mob;
     private final Level level;
     private int eatAnimationTick;
     private int eatDelay;
     private int ticksUntilStop;
 
-    public EatGrassGoal(GeoEntityBase mob, int eatDelay, int ticksUntilStop ) {
+    public EatGrassGoal(AbstractCornerCreature mob, int eatDelay, int ticksUntilStop ) {
         this.mob = mob;
         this.level = mob.level();
         this.eatDelay = eatDelay;

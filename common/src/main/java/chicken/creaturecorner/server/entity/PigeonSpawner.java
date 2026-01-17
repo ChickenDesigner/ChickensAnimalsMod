@@ -1,13 +1,11 @@
 package chicken.creaturecorner.server.entity;
 
-import chicken.creaturecorner.server.entity.obj.PigeonEntity;
+import chicken.creaturecorner.server.entity.obj.Pigeon;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnPlacements;
-import net.minecraft.world.entity.ai.village.poi.PoiManager;
-import net.minecraft.world.entity.ai.village.poi.PoiTypes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.CustomSpawner;
 import net.minecraft.world.level.GameRules;
@@ -37,7 +35,7 @@ public class PigeonSpawner implements CustomSpawner {
                             BlockPos pos = origin.offset(dx, 0, dz);
                             BlockPos top = level.getHeightmapPos(Heightmap.Types.WORLD_SURFACE, pos);
 
-                            if (SpawnPlacements.isSpawnPositionOk(CCEntities.PIGEON_TYPE.get(), level, top)) {
+                            if (SpawnPlacements.isSpawnPositionOk(CCEntities.PIGEON.get(), level, top)) {
                                 if (level.isCloseToVillage(top, 2)) {
                                     groundPos = top;
                                     break outer;
@@ -57,7 +55,7 @@ public class PigeonSpawner implements CustomSpawner {
     }
 
     private int spawnInVillage(ServerLevel serverLevel, BlockPos pos) {
-        List<PigeonEntity> list = serverLevel.getEntitiesOfClass(PigeonEntity.class, new AABB(pos).inflate(52.0, 32.0, 52.0));
+        List<Pigeon> list = serverLevel.getEntitiesOfClass(Pigeon.class, new AABB(pos).inflate(52.0, 32.0, 52.0));
         if (list.size() < 8) {
             return this.spawnCat(pos, serverLevel);
         } else {
@@ -67,7 +65,7 @@ public class PigeonSpawner implements CustomSpawner {
     }
 
     private int spawnCat(BlockPos pos, ServerLevel serverLevel) {
-        PigeonEntity cat = (PigeonEntity) CCEntities.PIGEON_TYPE.get().create(serverLevel);
+        Pigeon cat = (Pigeon) CCEntities.PIGEON.get().create(serverLevel);
         if (cat == null) {
             return 0;
         } else {

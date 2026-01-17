@@ -1,30 +1,49 @@
 package chicken.creaturecorner.server.block.obj.custom;
 
+import chicken.creaturecorner.server.blockentity.CCBlockEntities;
+import chicken.creaturecorner.server.blockentity.custom.PigeonLoftBlockEntity;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.tags.EnchantmentTags;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.BlockItemStateProperties;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Mirror;
-import net.minecraft.world.level.block.PipeBlock;
-import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
-public class PigeonLoftBlock extends Block {
+public class PigeonLoftBlock extends BaseEntityBlock {
 
     public static final BooleanProperty NORTH = PipeBlock.NORTH;
     public static final BooleanProperty EAST = PipeBlock.EAST;
@@ -33,6 +52,7 @@ public class PigeonLoftBlock extends Block {
     public static final BooleanProperty UP = PipeBlock.UP;
     public static final BooleanProperty DOWN = PipeBlock.DOWN;
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final IntegerProperty PIGEONS = IntegerProperty.create("pigeons", 0, 1);
 
     public static final Map<Direction, BooleanProperty> PROPERTY_BY_DIRECTION = ImmutableMap.copyOf(Util.make(Maps.newEnumMap(Direction.class), (p_55164_) -> {
         p_55164_.put(Direction.NORTH, NORTH);
@@ -47,13 +67,21 @@ public class PigeonLoftBlock extends Block {
     public PigeonLoftBlock(Properties pProperties) {
         super(pProperties);
         this.registerDefaultState(this.stateDefinition.any()
-                .setValue(NORTH, Boolean.valueOf(false))
-                .setValue(EAST, Boolean.valueOf(false))
-                .setValue(SOUTH, Boolean.valueOf(false))
-                .setValue(WEST, Boolean.valueOf(false))
-                .setValue(UP, Boolean.valueOf(false))
-                .setValue(DOWN, Boolean.valueOf(false))
+                .setValue(NORTH, false)
+                .setValue(EAST, false)
+                .setValue(SOUTH, false)
+                .setValue(WEST, false)
+                .setValue(UP, false)
+                .setValue(DOWN, false)
+                .setValue(PIGEONS, 0)
                 .setValue(FACING, Direction.NORTH));
+    }
+
+    public static final MapCodec<PigeonLoftBlock> CODEC = simpleCodec(PigeonLoftBlock::new);
+
+    @Override
+    protected MapCodec<? extends BaseEntityBlock> codec() {
+        return CODEC;
     }
 
     public boolean propagatesSkylightDown(BlockState pState, BlockGetter pReader, BlockPos pPos) {
@@ -112,8 +140,10 @@ public class PigeonLoftBlock extends Block {
                 .setValue(WEST, this.connectsTo(blockstate3, direction))
                 .setValue(UP, this.connectsTo(blockstate4, direction))
                 .setValue(DOWN, this.connectsTo(blockstate5, direction))
-                .setValue(FACING, direction);
+                .setValue(FACING, direction)
+                .setValue(PIGEONS, this.defaultBlockState().getValue(PIGEONS));
     }
+
     private boolean connectsTo(BlockState pState, Direction direction) {
         if (pState.is(this)){
             return pState.getValue(FACING).getAxis() == direction.getAxis();
@@ -133,7 +163,7 @@ public class PigeonLoftBlock extends Block {
     }
 
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
-        pBuilder.add(NORTH, EAST, SOUTH, WEST, UP, DOWN, FACING);
+        pBuilder.add(NORTH, EAST, SOUTH, WEST, UP, DOWN, FACING, PIGEONS);
     }
 
     public VoxelShape getVisualShape(BlockState pState, BlockGetter pReader, BlockPos pPos, CollisionContext pContext) {
@@ -150,4 +180,58 @@ public class PigeonLoftBlock extends Block {
     }
 
 
+    @Override
+    public @Nullable BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
+        return new PigeonLoftBlockEntity(blockPos, blockState);
+    }
+
+    @javax.annotation.Nullable
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> blockEntityType) {
+        return level.isClientSide ? createTickerHelper(blockEntityType, CCBlockEntities.PIGEON_LOFT.get(), PigeonLoftBlockEntity::serverTick) : null;
+    }
+
+
+    @Override
+    public void playerDestroy(Level level, Player player, BlockPos blockPos, BlockState blockState, @Nullable BlockEntity blockEntity, ItemStack itemStack) {
+        super.playerDestroy(level, player, blockPos, blockState, blockEntity, itemStack);
+        if (!level.isClientSide && blockEntity instanceof PigeonLoftBlockEntity birtDwellingBlockEntity) {
+            if (!EnchantmentHelper.hasTag(itemStack, EnchantmentTags.PREVENTS_BEE_SPAWNS_WHEN_MINING)) {
+                birtDwellingBlockEntity.tryReleasePigeon(blockState, PigeonLoftBlockEntity.PigeonState.EMERGENCY);
+                level.updateNeighbourForOutputSignal(blockPos, this);
+            }
+        }
+    }
+
+    @Override
+    public RenderShape getRenderShape(BlockState pState) {
+        return RenderShape.MODEL;
+    }
+
+    @Override
+    public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
+
+        BlockEntity blockEntity;
+        if (!level.isClientSide() && player.isCreative() && level.getGameRules().getBoolean(GameRules.RULE_DOBLOCKDROPS)
+                && (blockEntity = level.getBlockEntity(pos)) instanceof PigeonLoftBlockEntity) {
+
+            PigeonLoftBlockEntity pigeonLoftBlockEntity = (PigeonLoftBlockEntity)blockEntity;
+            ItemStack itemStack = new ItemStack(this);
+            boolean bl = !pigeonLoftBlockEntity.isEmpty();
+
+            if (bl) {
+                CompoundTag nbtCompound = new CompoundTag();
+                nbtCompound.put("Pigeons", pigeonLoftBlockEntity.getPigeons());
+                BlockItem.setBlockEntityData(itemStack, CCBlockEntities.PIGEON_LOFT.get(), nbtCompound);
+                nbtCompound = new CompoundTag();
+                itemStack.applyComponents(pigeonLoftBlockEntity.collectComponents());
+//                itemStack.set(DataComponents.CUSTOM_DATA, CustomData.of(nbtCompound));
+                ItemEntity itemEntity = new ItemEntity(level, pos.getX(), pos.getY(), pos.getZ(), itemStack);
+                itemEntity.setDefaultPickUpDelay();
+                level.addFreshEntity(itemEntity);
+            }
+
+        }
+        return super.playerWillDestroy(level, pos, state, player);
+    }
 }

@@ -121,7 +121,7 @@ public class CoyoteEntity extends GeoTamableEntity implements NeutralMob {
         this.targetSelector.addGoal(3, (new HurtByTargetGoal(this)));
         this.targetSelector.addGoal(8, new ResetUniversalAngerTargetGoal<>(this, true));
 
-        this.targetSelector.addGoal(7, new NearestAttackableTargetGoal<>(this, PigeonEntity.class, false, (living) -> this.isHungry()));
+        this.targetSelector.addGoal(7, new NearestAttackableTargetGoal<>(this, Pigeon.class, false, (living) -> this.isHungry()));
         this.targetSelector.addGoal(7, new NearestAttackableTargetGoal<>(this, Sheep.class, false, (entity) -> entity.isBaby() && this.isHungry()));
         this.targetSelector.addGoal(7, new NearestAttackableTargetGoal<>(this, Chicken.class, false, (living) -> this.isHungry()));
         this.targetSelector.addGoal(7, new NearestAttackableTargetGoal<>(this, Rabbit.class, false, (living) -> this.isHungry()));

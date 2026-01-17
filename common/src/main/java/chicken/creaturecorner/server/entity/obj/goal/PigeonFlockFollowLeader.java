@@ -1,6 +1,6 @@
 package chicken.creaturecorner.server.entity.obj.goal;
 
-import chicken.creaturecorner.server.entity.obj.PigeonEntity;
+import chicken.creaturecorner.server.entity.obj.Pigeon;
 import com.mojang.datafixers.DataFixUtils;
 import net.minecraft.world.entity.ai.goal.Goal;
 
@@ -9,16 +9,16 @@ import java.util.function.Predicate;
 
 public class PigeonFlockFollowLeader extends Goal {
     private static final int INTERVAL_TICKS = 200;
-    private final PigeonEntity mob;
+    private final Pigeon mob;
     private int timeToRecalcPath;
     private int nextStartTick;
 
-    public PigeonFlockFollowLeader(PigeonEntity fish) {
+    public PigeonFlockFollowLeader(Pigeon fish) {
         this.mob = fish;
         this.nextStartTick = this.nextStartTick(fish);
     }
 
-    protected int nextStartTick(PigeonEntity taskOwner) {
+    protected int nextStartTick(Pigeon taskOwner) {
         return reducedTickDelay(200 + taskOwner.getRandom().nextInt(200) % 20);
     }
 
@@ -33,11 +33,11 @@ public class PigeonFlockFollowLeader extends Goal {
             return false;
         } else {
             this.nextStartTick = this.nextStartTick(this.mob);
-            Predicate<PigeonEntity> predicate = p_25258_ ->{ return
+            Predicate<Pigeon> predicate = p_25258_ ->{ return
              p_25258_.canBeFollowed() || !p_25258_.isFollower();
             };
-            List<? extends PigeonEntity> list = this.mob.level().getEntitiesOfClass(this.mob.getClass(), this.mob.getBoundingBox().inflate(8.0D, 8.0D, 8.0D), predicate);
-            PigeonEntity abstractschoolingfish = DataFixUtils.orElse(list.stream().filter(PigeonEntity::canBeFollowed).findAny(), this.mob);
+            List<? extends Pigeon> list = this.mob.level().getEntitiesOfClass(this.mob.getClass(), this.mob.getBoundingBox().inflate(8.0D, 8.0D, 8.0D), predicate);
+            Pigeon abstractschoolingfish = DataFixUtils.orElse(list.stream().filter(Pigeon::canBeFollowed).findAny(), this.mob);
             abstractschoolingfish.addFollowers(list.stream().filter((fish) -> {
                 return !fish.isFollower();
             }));

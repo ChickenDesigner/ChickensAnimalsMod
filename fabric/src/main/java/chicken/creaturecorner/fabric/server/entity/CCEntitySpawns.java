@@ -5,8 +5,8 @@ import chicken.creaturecorner.server.entity.CCEntities;
 import chicken.creaturecorner.server.entity.PigeonSpawner;
 import chicken.creaturecorner.server.entity.obj.CaracaraEntity;
 import chicken.creaturecorner.server.entity.obj.CoyoteEntity;
-import chicken.creaturecorner.server.entity.obj.EndoveEntity;
-import chicken.creaturecorner.server.entity.obj.PigeonEntity;
+import chicken.creaturecorner.server.entity.obj.Endove;
+import chicken.creaturecorner.server.entity.obj.Pigeon;
 import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.registries.Registries;
@@ -27,8 +27,8 @@ public class CCEntitySpawns {
     private static final PigeonSpawner pigeonSpawner = new PigeonSpawner();
 
     public static void init() {
-        SpawnPlacements.register(CCEntities.PIGEON_TYPE.get(), SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, PigeonEntity::checkAnimalSpawnRules);
-        SpawnPlacements.register(CCEntities.ENDOVE_TYPE.get(), SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EndoveEntity::canEndoveSpawn);
+        SpawnPlacements.register(CCEntities.PIGEON.get(), SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Pigeon::checkAnimalSpawnRules);
+        SpawnPlacements.register(CCEntities.ENDOVE.get(), SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Endove::canEndoveSpawn);
         SpawnPlacements.register(CCEntities.CARACARA_TYPE.get(), SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, CaracaraEntity::checkAnimalSpawnRules);
         SpawnPlacements.register(CCEntities.COYOTE_TYPE.get(), SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, CoyoteEntity::checkCoyoteSpawnRules);
 
@@ -41,11 +41,11 @@ public class CCEntitySpawns {
                 , 8, 2, 5
         );
         BiomeModifications.addSpawn(
-                biomeSelectionContext -> biomeSelectionContext.hasTag(endoveBiome), MobCategory.CREATURE, CCEntities.ENDOVE_TYPE.get()
+                biomeSelectionContext -> biomeSelectionContext.hasTag(endoveBiome), MobCategory.CREATURE, CCEntities.ENDOVE.get()
                 , 100, 5, 15
         );
         BiomeModifications.addSpawn(
-                biomeSelectionContext -> biomeSelectionContext.hasTag(pigeonBiome), MobCategory.CREATURE, CCEntities.PIGEON_TYPE.get()
+                biomeSelectionContext -> biomeSelectionContext.hasTag(pigeonBiome), MobCategory.CREATURE, CCEntities.PIGEON.get()
                 , 6, 5, 10
         );
 

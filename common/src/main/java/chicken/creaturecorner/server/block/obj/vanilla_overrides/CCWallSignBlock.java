@@ -1,6 +1,6 @@
 package chicken.creaturecorner.server.block.obj.vanilla_overrides;
 
-import chicken.creaturecorner.server.blockentity.entity_obj.vanilla.CCSignBlockEntity;
+import chicken.creaturecorner.server.blockentity.custom.CCSignBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.WallSignBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;

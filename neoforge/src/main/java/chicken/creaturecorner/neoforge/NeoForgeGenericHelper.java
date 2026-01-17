@@ -2,7 +2,6 @@ package chicken.creaturecorner.neoforge;
 
 import chicken.creaturecorner.platform.services.AccessUtil;
 import chicken.creaturecorner.platform.services.IGeneric;
-import com.google.common.base.Supplier;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.sounds.SoundEvent;

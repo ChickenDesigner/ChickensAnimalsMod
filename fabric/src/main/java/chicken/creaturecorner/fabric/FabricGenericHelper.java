@@ -2,7 +2,6 @@ package chicken.creaturecorner.fabric;
 
 import chicken.creaturecorner.platform.services.AccessUtil;
 import chicken.creaturecorner.platform.services.IGeneric;
-import com.google.common.base.Supplier;
 import com.mojang.serialization.MapCodec;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.minecraft.network.chat.MutableComponent;

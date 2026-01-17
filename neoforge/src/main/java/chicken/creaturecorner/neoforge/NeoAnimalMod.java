@@ -13,4 +13,5 @@ public class NeoAnimalMod {
         CCCommon.init();
         modEventBus.addListener(NeoForgePlatformHelper::registerEvent);
     }
+
 }

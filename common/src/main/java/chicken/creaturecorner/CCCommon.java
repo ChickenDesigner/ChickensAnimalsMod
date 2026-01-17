@@ -1,6 +1,7 @@
 package chicken.creaturecorner;
 
 import chicken.creaturecorner.server.block.CCBlocks;
+import chicken.creaturecorner.server.block.CCPoiTypes;
 import chicken.creaturecorner.server.blockentity.CCBlockEntities;
 import chicken.creaturecorner.server.entity.CCEntities;
 import chicken.creaturecorner.server.item.CCItemGroups;
@@ -20,6 +21,7 @@ public class CCCommon {
         new CCBlockEntities();
         new CCItemGroups();
         new CCSounds();
+        new CCPoiTypes();
     }
 
     public static ResourceLocation createId(String s) {

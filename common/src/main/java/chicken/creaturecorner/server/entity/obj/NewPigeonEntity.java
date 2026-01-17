@@ -169,7 +169,7 @@ public class NewPigeonEntity extends AbstractCornerCreature {
 
             int extraBirds = this.getRandom().nextInt(1, 5);
             for (int i = 0; i < extraBirds; i++){
-                PigeonEntity pigeon = CCEntities.PIGEON_TYPE.get().create(level.getLevel());
+                Pigeon pigeon = CCEntities.PIGEON.get().create(level.getLevel());
                 if (pigeon != null) {
                     pigeon.moveTo(this.getX(), this.getY(), this.getZ(), random.nextInt(360), 0.0F);
                     pigeon.finalizeSpawn(level, level.getCurrentDifficultyAt(this.blockPosition()), MobSpawnType.NATURAL, spawnGroupData);

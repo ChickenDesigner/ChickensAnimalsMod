@@ -1,0 +1,46 @@
+{
+  "sources": [
+    {
+      "type": "minecraft:single",
+      "resource": "creaturecorner:entity/pigeon/pigeon_grey"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "creaturecorner:entity/pigeon/pigeon_red"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "creaturecorner:entity/pigeon/pigeon_white"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "creaturecorner:entity/pigeon/pigeon_canolli"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "creaturecorner:entity/pigeon/pigeon_end"
+    },
+
+
+    {
+      "type": "minecraft:single",
+      "resource": "creaturecorner:entity/pigeon/pigeon_baby_grey_asleep"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "creaturecorner:entity/pigeon/pigeon_baby_red_asleep"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "creaturecorner:entity/pigeon/pigeon_baby_white_asleep"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "creaturecorner:entity/pigeon/pigeon_baby_canolli_asleep"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "creaturecorner:entity/pigeon/pigeon_baby_end_asleep"
+    }
+  ]
+}

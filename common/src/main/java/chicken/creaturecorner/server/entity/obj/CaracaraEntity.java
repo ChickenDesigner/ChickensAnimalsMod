@@ -133,7 +133,7 @@ public class CaracaraEntity extends AbstractCornerCreature implements NeutralMob
         this.goalSelector.addGoal(4, new CaracaraStrollGoal(this, (double)0.5F));
         this.goalSelector.addGoal(7, new AIFlyIdle());
         this.goalSelector.addGoal(4, new BreedGoal(this, (double)1.0F, CaracaraEntity.class));
-        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, PigeonEntity.class, false));
+        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Pigeon.class, false));
         this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Chicken.class, false));
         this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Rabbit.class, false));
         this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Pig.class, false));
@@ -318,7 +318,7 @@ public class CaracaraEntity extends AbstractCornerCreature implements NeutralMob
         }
 
         LivingEntity var3 = this.getTarget();
-        if (var3 instanceof PigeonEntity pigeon) {
+        if (var3 instanceof Pigeon pigeon) {
             if (this.canFly() && pigeon.isFlying() && this.random.nextInt(10) == 0) {
                 this.setFlyTicks(500);
                 this.setFlying(true);
@@ -380,7 +380,7 @@ public class CaracaraEntity extends AbstractCornerCreature implements NeutralMob
     }
 
     public boolean canAttack(LivingEntity target) {
-        return super.canAttack(target) && (this.getLastHurtByMob() != null && this.getLastHurtByMob() == target || this.isHungry() && (!this.isBaby() || this.isBaby() && (target instanceof PigeonEntity || target instanceof Rabbit || target instanceof Chicken)));
+        return super.canAttack(target) && (this.getLastHurtByMob() != null && this.getLastHurtByMob() == target || this.isHungry() && (!this.isBaby() || this.isBaby() && (target instanceof Pigeon || target instanceof Rabbit || target instanceof Chicken)));
     }
 
 

@@ -13,21 +13,15 @@ import net.minecraft.world.entity.MobCategory;
 
 public class CCEntities {
 
-    public static final Supplier<EntityType<PigeonEntity>> PIGEON_TYPE =
+    public static final Supplier<EntityType<Pigeon>> PIGEON =
             register("pigeon",
-                    () -> EntityType.Builder.of(PigeonEntity::new, MobCategory.CREATURE)
+                    () -> EntityType.Builder.of(Pigeon::new, MobCategory.CREATURE)
                             .sized(0.7f, 0.9f)
                             .build(ResourceLocation.fromNamespaceAndPath(CCConstants.MOD_ID, "pigeon").toString()));
 
-//    public static final Supplier<EntityType<NewPigeonEntity>> NEW_PIGEON =
-//            register("new_pigeon",
-//                    () -> EntityType.Builder.of(NewPigeonEntity::new, MobCategory.CREATURE)
-//                            .sized(0.7f, 0.9f)
-//                            .build(ResourceLocation.fromNamespaceAndPath(CCConstants.MOD_ID, "new_pigeon").toString()));
-
-    public static final Supplier<EntityType<EndoveEntity>> ENDOVE_TYPE =
+    public static final Supplier<EntityType<Endove>> ENDOVE =
             register("endove",
-                    () -> EntityType.Builder.of(EndoveEntity::new, MobCategory.CREATURE)
+                    () -> EntityType.Builder.of(Endove::new, MobCategory.CREATURE)
                             .sized(0.7f, 0.9f)
                             .build(ResourceLocation.fromNamespaceAndPath(CCConstants.MOD_ID, "endove").toString()));
 

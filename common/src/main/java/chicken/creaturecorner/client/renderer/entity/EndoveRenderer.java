@@ -40,6 +40,6 @@ public class EndoveRenderer extends MobRenderer<Endove, HierarchicalModel<Endove
     public ResourceLocation getTextureLocation(Endove pigeon) {
 
         return ResourceLocation.fromNamespaceAndPath(CCConstants.MOD_ID,
-                "textures/entity/pigeon/pigeon_" + (pigeon.isBaby() ? "baby_" : "") + "_end.png");
+                "textures/entity/pigeon/pigeon_" + (pigeon.isBaby() ? "baby_" : "") + "end.png");
     }
 }

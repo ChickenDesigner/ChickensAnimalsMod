@@ -1,8 +1,8 @@
 package chicken.creaturecorner.server.blockentity.custom;
 
-import chicken.creaturecorner.CCConstants;
 import chicken.creaturecorner.server.block.obj.custom.PigeonLoftBlock;
 import chicken.creaturecorner.server.blockentity.CCBlockEntities;
+import chicken.creaturecorner.server.entity.obj.Endove;
 import chicken.creaturecorner.server.entity.obj.Pigeon;
 import chicken.creaturecorner.server.sound.CCSounds;
 import com.google.common.collect.Lists;
@@ -15,15 +15,12 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.FireBlock;
-import net.minecraft.world.level.block.entity.BeehiveBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -32,6 +29,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 
 import static chicken.creaturecorner.server.block.obj.custom.PigeonLoftBlock.PIGEONS;
+import static chicken.creaturecorner.server.block.obj.custom.PigeonLoftBlock.PIGEON_TYPE;
 
 public class PigeonLoftBlockEntity extends BlockEntity {
 
@@ -66,9 +64,9 @@ public class PigeonLoftBlockEntity extends BlockEntity {
             "Passengers",
             "leash",
             "UUID");
-    private int day = -1;
     private final List<PigeonData> pigeons = Lists.newArrayList();
     public int time;
+    public boolean hasPigeon;
 
     public PigeonLoftBlockEntity(BlockPos pos, BlockState blockState) {
         super(CCBlockEntities.PIGEON_LOFT.get(), pos, blockState);
@@ -78,24 +76,32 @@ public class PigeonLoftBlockEntity extends BlockEntity {
         return this.pigeons.isEmpty();
     }
 
+    public boolean hasPigeon(){
+        return this.hasPigeon;
+    }
+
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
         this.pigeons.clear();
-        ListTag nbtList = tag.getList(PIGEONS_KEY, 10);
-        for (int i = 0; i < nbtList.size(); ++i) {
-            CompoundTag nbtCompound = nbtList.getCompound(i);
-            PigeonData pigeon = new PigeonData(nbtCompound.getCompound(ENTITY_DATA_KEY), nbtCompound.getInt(TICKS_IN_DWELLING_KEY), nbtCompound.getInt(MIN_OCCUPATION_TICKS_KEY));
+
+        if (tag.contains(PIGEONS_KEY, 9)) {
+            ListTag nbtList = tag.getList(PIGEONS_KEY, 10);
+            CompoundTag nbtCompound = nbtList.getCompound(0);
+            PigeonData pigeon = new PigeonData(nbtCompound.getCompound(ENTITY_DATA_KEY),
+                    nbtCompound.getInt(TICKS_IN_DWELLING_KEY),
+                    nbtCompound.getInt(MIN_OCCUPATION_TICKS_KEY));
+
             this.pigeons.add(pigeon);
         }
-        this.day = tag.getInt("Day");
+        super.loadAdditional(tag, registries);
+        this.setChanged();
     }
 
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
         tag.put(PIGEONS_KEY, this.getPigeons());
-        tag.putInt("Day", this.day);
+        this.setChanged();
     }
 
     public ListTag getPigeons() {
@@ -112,28 +118,54 @@ public class PigeonLoftBlockEntity extends BlockEntity {
         return nbtList;
     }
 
-    public String getPigeonVariant(){
+    public PigeonLoftBlock.PigeonType getPigeonVariant(){
 
         for (PigeonData pigeon : this.pigeons){
 
             CompoundTag nbtCompound = pigeon.entityData.copy();
 
             Entity newPigeon = EntityType.loadEntityRecursive(nbtCompound, this.level, entity -> entity);
+
             if (newPigeon != null) {
+                if (newPigeon instanceof Endove endove) {
+                    return endove.isBaby() ? PigeonLoftBlock.PigeonType.BABY_END : PigeonLoftBlock.PigeonType.ADULT_END;
+
+                }
+
                 if (newPigeon instanceof Pigeon pigeonEntity) {
-                    String s = ChatFormatting.stripFormatting(pigeonEntity.getName().getString());
-                        return s.toLowerCase().equals("cannoli") ? "cannoli" : pigeonEntity.getVariantName();
+                    if (pigeonEntity.isCannoli())
+                        return PigeonLoftBlock.PigeonType.ADULT_CANNOLI;
+
+                    return switch (pigeonEntity.getVariant()){
+                        case 1 -> pigeonEntity.isBaby() ? PigeonLoftBlock.PigeonType.BABY_WHITE : PigeonLoftBlock.PigeonType.ADULT_WHITE;
+                        case 2 -> pigeonEntity.isBaby() ? PigeonLoftBlock.PigeonType.BABY_RED : PigeonLoftBlock.PigeonType.ADULT_RED;
+                        default -> pigeonEntity.isBaby() ? PigeonLoftBlock.PigeonType.BABY_GREY : PigeonLoftBlock.PigeonType.ADULT_GREY;
+                    };
                 }
             }
-
-//            int variant = nbtCompound.getInt("Variant");
-//            return Pigeon.getVariantName(variant);
         }
-        return Pigeon.getVariantName(0);
+        return PigeonLoftBlock.PigeonType.ADULT_GREY;
+    }
+
+    public Boolean isPigeonBaby(){
+
+        for (PigeonData pigeon : this.pigeons){
+
+            CompoundTag nbtCompound = pigeon.entityData.copy();
+
+            Entity newPigeon = EntityType.loadEntityRecursive(nbtCompound, this.level, entity -> entity);
+
+            if (newPigeon != null) {
+                if (newPigeon instanceof Pigeon pigeonEntity) {
+                    return pigeonEntity.isBaby();
+                }
+            }
+        }
+        return false;
     }
 
     public static class PigeonData {
-        final CompoundTag entityData;
+        public final CompoundTag entityData;
         static int ticksInDwelling;
         final int minOccupationTicks;
 
@@ -145,11 +177,11 @@ public class PigeonLoftBlockEntity extends BlockEntity {
         }
     }
 
-    public List<Entity> tryReleasePigeon(BlockState state, PigeonState pigeonState) {
+    public List<Entity> tryReleasePigeon(BlockState state, PigeonState pigeonState, PigeonLoftBlockEntity pigeonLoftBlockEntity) {
         ArrayList<Entity> list = Lists.newArrayList();
         this.pigeons.removeIf(pigeon -> {
             assert this.level != null;
-            return PigeonLoftBlockEntity.releasePigeon(this.level, this.worldPosition, state, pigeon, null, pigeonState);
+            return PigeonLoftBlockEntity.releasePigeon(this.level, this.worldPosition, state, pigeon, null, pigeonState, pigeonLoftBlockEntity);
         });
         if (!list.isEmpty()) {
             super.setChanged();
@@ -170,6 +202,7 @@ public class PigeonLoftBlockEntity extends BlockEntity {
         CompoundTag nbtCompound = new CompoundTag();
         entity.save(nbtCompound);
         BlockPos blockPos = this.getBlockPos();
+        this.pigeons.clear();
         this.addPigeon(nbtCompound, ticksInDwelling);
         if (this.level != null) {
 //            this.level.playSound(null, blockPos.getX(), blockPos.getY(), blockPos.getZ(), SpeciesSoundEvents.BLOCK_PIGEON_DWELLING_ENTER.get(), SoundSource.BLOCKS, 1.0f, 1.0f);
@@ -187,7 +220,7 @@ public class PigeonLoftBlockEntity extends BlockEntity {
 
     public void setChanged() {
         if (this.isFireNearby()) {
-            this.tryReleasePigeon(this.level.getBlockState(this.getBlockPos()), PigeonState.EMERGENCY);
+            this.tryReleasePigeon(this.level.getBlockState(this.getBlockPos()), PigeonState.EMERGENCY, this);
         }
 
         super.setChanged();
@@ -207,8 +240,9 @@ public class PigeonLoftBlockEntity extends BlockEntity {
         }
     }
 
-    private static boolean releasePigeon(Level world, BlockPos pos, BlockState state, PigeonData pigeon, @Nullable List<Entity> entities, PigeonState pigeonState) {
-        if ((!world.isDay() || world.isRaining()) && pigeonState != PigeonState.EMERGENCY) {
+
+    private static boolean releasePigeon(Level world, BlockPos pos, BlockState state, PigeonData pigeon, @Nullable List<Entity> entities, PigeonState pigeonState, PigeonLoftBlockEntity blockEntity) {
+        if ((world.isNight() || world.isRaining()) && pigeonState != PigeonState.EMERGENCY) {
             return false;
         }
         CompoundTag nbtCompound = pigeon.entityData.copy();
@@ -234,6 +268,11 @@ public class PigeonLoftBlockEntity extends BlockEntity {
 //            world.playSound(null, pos, SpeciesSoundEvents.BLOCK_PIGEON_DWELLING_EXIT.get(), SoundSource.BLOCKS, 1.0f, 1.0f);
                 world.gameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Context.of(newPigeon, world.getBlockState(pos)));
                 pigeonEntity.setLoftPos(pos);
+                blockEntity.setChanged();
+                blockEntity.pigeons.clear();
+
+//                blockEntity.pigeons.removeIf(pigeonData -> world.addFreshEntity(pigeonEntity));
+
                 return world.addFreshEntity(pigeonEntity);
 
             } else {
@@ -249,16 +288,19 @@ public class PigeonLoftBlockEntity extends BlockEntity {
         else if (i > 0) pigeon.setAge(Math.max(0, i - ticks));
     }
 
-    private static void tickPigeons(Level world, BlockPos pos, BlockState state, List<PigeonData> pigeons) {
+    public List<PigeonData> getPigeonDataList(){
+        return pigeons;
+    }
+
+    private static void tickPigeons(Level world, BlockPos pos, BlockState state, List<PigeonData> pigeons, PigeonLoftBlockEntity blockEntity) {
         boolean bl = false;
-        Iterator<PigeonData> iterator = pigeons.iterator();
-        world.setBlockAndUpdate(pos, state.setValue(PIGEONS, pigeons.size()));
-        while (iterator.hasNext()) {
-            PigeonData birt = iterator.next();
-            if (PigeonLoftBlockEntity.PigeonData.ticksInDwelling > birt.minOccupationTicks) {
-                if (PigeonLoftBlockEntity.releasePigeon(world, pos, state, birt, null, PigeonState.PIGEON_RELEASED)) {
+        world.setBlockAndUpdate(pos, state.setValue(PIGEONS, blockEntity.pigeons.size())
+                .setValue(PIGEON_TYPE, blockEntity.getPigeonVariant()));
+        if (!pigeons.isEmpty()) {
+            PigeonData pigeon = pigeons.getFirst();
+            if ((PigeonLoftBlockEntity.PigeonData.ticksInDwelling > pigeon.minOccupationTicks) || (world.isDay() && !world.isRaining())) {
+                if (PigeonLoftBlockEntity.releasePigeon(world, pos, state, pigeon, null, PigeonState.PIGEON_RELEASED, blockEntity)) {
                     bl = true;
-                    iterator.remove();
                 }
             }
             ++PigeonLoftBlockEntity.PigeonData.ticksInDwelling;
@@ -266,10 +308,21 @@ public class PigeonLoftBlockEntity extends BlockEntity {
         if (bl) PigeonLoftBlockEntity.setChanged(world, pos, state);
     }
 
-    public static void serverTick(Level world, BlockPos pos, BlockState state, PigeonLoftBlockEntity blockEntity) {
+    public static void clientTick(Level world, BlockPos pos, BlockState state, PigeonLoftBlockEntity blockEntity) {
         ++blockEntity.time;
 
-        PigeonLoftBlockEntity.tickPigeons(world, pos, state, blockEntity.pigeons);
+    }
+
+    public static void serverTick(Level world, BlockPos pos, BlockState state, PigeonLoftBlockEntity blockEntity) {
+
+        PigeonLoftBlockEntity.tickPigeons(world, pos, state, blockEntity.pigeons, blockEntity);
+
+        if (!blockEntity.pigeons.isEmpty() && !blockEntity.hasPigeon ){
+            blockEntity.hasPigeon = true;
+        }
+        if (blockEntity.pigeons.isEmpty() && blockEntity.hasPigeon){
+            blockEntity.hasPigeon = false;
+        }
 
         if (!blockEntity.pigeons.isEmpty() && world.getRandom().nextDouble() < 0.005) {
             double d = (double)pos.getX() + 0.5;
@@ -287,6 +340,27 @@ public class PigeonLoftBlockEntity extends BlockEntity {
     protected void collectImplicitComponents(DataComponentMap.Builder components) {
         super.collectImplicitComponents(components);
         components.set(DataComponents.CUSTOM_DATA, this.getPigeonData());
+    }
+
+    @Override
+    protected void applyImplicitComponents(BlockEntity.DataComponentInput componentInput) {
+        super.applyImplicitComponents(componentInput);
+        this.pigeons.clear();
+        CustomData data = componentInput.get(DataComponents.CUSTOM_DATA);
+        if (data != null){
+            ListTag nbtList = data.copyTag().getList(PIGEONS_KEY, 10);
+            for (int i = 0; i < nbtList.size(); ++i) {
+                CompoundTag nbtCompound = nbtList.getCompound(i);
+                PigeonData pigeon = new PigeonData(nbtCompound.getCompound(ENTITY_DATA_KEY), nbtCompound.getInt(TICKS_IN_DWELLING_KEY), nbtCompound.getInt(MIN_OCCUPATION_TICKS_KEY));
+                this.pigeons.set(0, pigeon);
+            }
+        }
+    }
+
+    @Override
+    public void removeComponentsFromTag(CompoundTag tag) {
+        super.removeComponentsFromTag(tag);
+        tag.remove("Pigeons");
     }
 
     private CustomData getPigeonData() {

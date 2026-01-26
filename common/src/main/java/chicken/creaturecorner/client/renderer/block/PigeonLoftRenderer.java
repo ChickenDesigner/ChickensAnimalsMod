@@ -6,6 +6,7 @@ import chicken.creaturecorner.client.model.block.loft.BabyPigeonInLoftModel;
 import chicken.creaturecorner.client.model.block.loft.PigeonInLoftModel;
 import chicken.creaturecorner.server.block.obj.custom.PigeonLoftBlock;
 import chicken.creaturecorner.server.blockentity.custom.PigeonLoftBlockEntity;
+import chicken.creaturecorner.server.entity.obj.Pigeon;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -16,18 +17,15 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class PigeonLoftRenderer implements BlockEntityRenderer<PigeonLoftBlockEntity> {
-
-    public static final Material PIGEON_LOCATION = new Material(TextureAtlas.LOCATION_BLOCKS,
-            ResourceLocation.fromNamespaceAndPath(CCConstants.MOD_ID, "entity/pigeon/pigeon_grey"));
-
-    public static final Material BABY_PIGEON_LOCATION = new Material(TextureAtlas.LOCATION_BLOCKS,
-            ResourceLocation.fromNamespaceAndPath(CCConstants.MOD_ID, "entity/pigeon/pigeon_baby_grey_asleep"));
 
     private final PigeonInLoftModel adultModel;
     private final BabyPigeonInLoftModel babyModel;
@@ -54,9 +52,26 @@ public class PigeonLoftRenderer implements BlockEntityRenderer<PigeonLoftBlockEn
 
             float f = (float)pBlockEntity.time + pPartialTick;
 
-            this.adultModel.setupAnim(f, rotation);
-            VertexConsumer vertexconsumer = PIGEON_LOCATION.buffer(pBuffer, RenderType::entityTranslucentCull);
-            this.adultModel.renderToBuffer(pPoseStack, vertexconsumer, pPackedLight, pPackedOverlay, -1);
+            if (pBlockEntity.getBlockState().getValue(PigeonLoftBlock.PIGEONS) > 0){
+                Material MATERIAL = new Material(TextureAtlas.LOCATION_BLOCKS,
+                        ResourceLocation.fromNamespaceAndPath(CCConstants.MOD_ID, "entity/pigeon/pigeon_" +
+                                pBlockEntity.getBlockState().getValue(PigeonLoftBlock.PIGEON_TYPE).toString()));
+
+                VertexConsumer vertexconsumer = MATERIAL.buffer(pBuffer, RenderType::entityTranslucentCull);
+
+                if (pBlockEntity.getBlockState().getValue(PigeonLoftBlock.PIGEON_TYPE) == PigeonLoftBlock.PigeonType.BABY_END
+                || pBlockEntity.getBlockState().getValue(PigeonLoftBlock.PIGEON_TYPE) == PigeonLoftBlock.PigeonType.BABY_GREY
+                || pBlockEntity.getBlockState().getValue(PigeonLoftBlock.PIGEON_TYPE) == PigeonLoftBlock.PigeonType.BABY_WHITE
+                || pBlockEntity.getBlockState().getValue(PigeonLoftBlock.PIGEON_TYPE) == PigeonLoftBlock.PigeonType.BABY_RED){
+                    pPoseStack.mulPose(Axis.YP.rotationDegrees(90));
+                    this.babyModel.setupAnim(f, rotation);
+                    this.babyModel.renderToBuffer(pPoseStack, vertexconsumer, pPackedLight, pPackedOverlay, -1);
+                }else{
+                    this.adultModel.setupAnim(f, rotation);
+                    this.adultModel.renderToBuffer(pPoseStack, vertexconsumer, pPackedLight, pPackedOverlay, -1);
+                }
+            }
+
         pPoseStack.popPose();
     }
 

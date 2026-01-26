@@ -8,19 +8,15 @@ import com.mojang.serialization.MapCodec;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.component.DataComponentType;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.tags.EnchantmentTags;
+import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.BlockItemStateProperties;
-import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
@@ -31,10 +27,7 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
-import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.block.state.properties.*;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -53,6 +46,7 @@ public class PigeonLoftBlock extends BaseEntityBlock {
     public static final BooleanProperty DOWN = PipeBlock.DOWN;
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final IntegerProperty PIGEONS = IntegerProperty.create("pigeons", 0, 1);
+    public static final EnumProperty<PigeonType> PIGEON_TYPE = EnumProperty.create("pigeon_type", PigeonType.class);
 
     public static final Map<Direction, BooleanProperty> PROPERTY_BY_DIRECTION = ImmutableMap.copyOf(Util.make(Maps.newEnumMap(Direction.class), (p_55164_) -> {
         p_55164_.put(Direction.NORTH, NORTH);
@@ -74,7 +68,8 @@ public class PigeonLoftBlock extends BaseEntityBlock {
                 .setValue(UP, false)
                 .setValue(DOWN, false)
                 .setValue(PIGEONS, 0)
-                .setValue(FACING, Direction.NORTH));
+                .setValue(FACING, Direction.NORTH)
+                .setValue(PIGEON_TYPE, PigeonType.ADULT_GREY));
     }
 
     public static final MapCodec<PigeonLoftBlock> CODEC = simpleCodec(PigeonLoftBlock::new);
@@ -141,7 +136,8 @@ public class PigeonLoftBlock extends BaseEntityBlock {
                 .setValue(UP, this.connectsTo(blockstate4, direction))
                 .setValue(DOWN, this.connectsTo(blockstate5, direction))
                 .setValue(FACING, direction)
-                .setValue(PIGEONS, this.defaultBlockState().getValue(PIGEONS));
+                .setValue(PIGEONS, this.defaultBlockState().getValue(PIGEONS))
+                .setValue(PIGEON_TYPE, this.defaultBlockState().getValue(PIGEON_TYPE));
     }
 
     private boolean connectsTo(BlockState pState, Direction direction) {
@@ -163,7 +159,7 @@ public class PigeonLoftBlock extends BaseEntityBlock {
     }
 
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
-        pBuilder.add(NORTH, EAST, SOUTH, WEST, UP, DOWN, FACING, PIGEONS);
+        pBuilder.add(NORTH, EAST, SOUTH, WEST, UP, DOWN, FACING, PIGEONS, PIGEON_TYPE);
     }
 
     public VoxelShape getVisualShape(BlockState pState, BlockGetter pReader, BlockPos pPos, CollisionContext pContext) {
@@ -188,16 +184,17 @@ public class PigeonLoftBlock extends BaseEntityBlock {
     @javax.annotation.Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> blockEntityType) {
-        return level.isClientSide ? createTickerHelper(blockEntityType, CCBlockEntities.PIGEON_LOFT.get(), PigeonLoftBlockEntity::serverTick) : null;
+        return level.isClientSide ? createTickerHelper(blockEntityType, CCBlockEntities.PIGEON_LOFT.get(), PigeonLoftBlockEntity::clientTick)
+                : createTickerHelper(blockEntityType, CCBlockEntities.PIGEON_LOFT.get(), PigeonLoftBlockEntity::serverTick);
     }
 
 
     @Override
     public void playerDestroy(Level level, Player player, BlockPos blockPos, BlockState blockState, @Nullable BlockEntity blockEntity, ItemStack itemStack) {
         super.playerDestroy(level, player, blockPos, blockState, blockEntity, itemStack);
-        if (!level.isClientSide && blockEntity instanceof PigeonLoftBlockEntity birtDwellingBlockEntity) {
+        if (!level.isClientSide && blockEntity instanceof PigeonLoftBlockEntity pigeonLoftBlockEntity) {
             if (!EnchantmentHelper.hasTag(itemStack, EnchantmentTags.PREVENTS_BEE_SPAWNS_WHEN_MINING)) {
-                birtDwellingBlockEntity.tryReleasePigeon(blockState, PigeonLoftBlockEntity.PigeonState.EMERGENCY);
+                pigeonLoftBlockEntity.tryReleasePigeon(blockState, PigeonLoftBlockEntity.PigeonState.EMERGENCY, pigeonLoftBlockEntity);
                 level.updateNeighbourForOutputSignal(blockPos, this);
             }
         }
@@ -212,7 +209,10 @@ public class PigeonLoftBlock extends BaseEntityBlock {
     public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
 
         BlockEntity blockEntity;
-        if (!level.isClientSide() && player.isCreative() && level.getGameRules().getBoolean(GameRules.RULE_DOBLOCKDROPS)
+        if (!level.isClientSide() && (player.isCreative()
+//                || EnchantmentHelper.hasTag(player.getItemInHand(InteractionHand.MAIN_HAND),
+//                EnchantmentTags.PREVENTS_BEE_SPAWNS_WHEN_MINING)
+        ) && level.getGameRules().getBoolean(GameRules.RULE_DOBLOCKDROPS)
                 && (blockEntity = level.getBlockEntity(pos)) instanceof PigeonLoftBlockEntity) {
 
             PigeonLoftBlockEntity pigeonLoftBlockEntity = (PigeonLoftBlockEntity)blockEntity;
@@ -233,5 +233,31 @@ public class PigeonLoftBlock extends BaseEntityBlock {
 
         }
         return super.playerWillDestroy(level, pos, state, player);
+    }
+
+    public enum PigeonType implements StringRepresentable {
+        ADULT_GREY("grey"),
+        BABY_GREY("baby_grey_asleep"),
+        ADULT_WHITE("white"),
+        BABY_WHITE("baby_white_asleep"),
+        ADULT_END("end"),
+        BABY_END("baby_end_asleep"),
+        ADULT_RED("red"),
+        BABY_RED("baby_red_asleep"),
+        ADULT_CANNOLI("canolli");
+
+        private final String name;
+
+        private PigeonType(String name) {
+            this.name = name;
+        }
+
+        public String toString() {
+            return this.name;
+        }
+
+        public String getSerializedName() {
+            return this.name;
+        }
     }
 }

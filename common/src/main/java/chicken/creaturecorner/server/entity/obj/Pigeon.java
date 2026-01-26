@@ -1,7 +1,9 @@
 package chicken.creaturecorner.server.entity.obj;
 
 
+import chicken.creaturecorner.server.block.CCBlocks;
 import chicken.creaturecorner.server.block.CCPoiTypes;
+import chicken.creaturecorner.server.block.obj.custom.PigeonLoftBlock;
 import chicken.creaturecorner.server.blockentity.CCBlockEntities;
 import chicken.creaturecorner.server.blockentity.custom.PigeonLoftBlockEntity;
 import chicken.creaturecorner.server.entity.CCEntities;
@@ -11,6 +13,7 @@ import chicken.creaturecorner.server.sound.CCSounds;
 import chicken.creaturecorner.util.CCTags;
 import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.longs.LongSet;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
@@ -100,6 +103,11 @@ public class Pigeon extends AbstractCornerCreature {
         }
 
         super.customServerAiStep();
+    }
+
+    public boolean isCannoli(){
+        String s = ChatFormatting.stripFormatting(this.getName().getString());
+        return s.toLowerCase().equals("cannoli") && !this.isBaby();
     }
 
     @Override
@@ -240,6 +248,13 @@ public class Pigeon extends AbstractCornerCreature {
 
     @Override
     public String getVariantName() {
+        String s = ChatFormatting.stripFormatting(this.getName().getString());
+
+        if (this instanceof Endove)
+            return "end";
+
+        if (s.toLowerCase().equals("cannoli") && !this.isBaby())
+            return "canolli";
 
         return switch (getVariant()) {
             case 1 -> "white";
@@ -279,7 +294,7 @@ public class Pigeon extends AbstractCornerCreature {
     }
 
     public boolean canBeFollowed() {
-        return !this.isFollower() && this.hasFollowers() && this.schoolSize < this.getMaxSchoolSize() && !this.isBaby() && this.level().isDay();
+        return !this.isFollower() && this.hasFollowers() && this.schoolSize < this.getMaxSchoolSize() && !this.isBaby() && this.level().isDay() && this.isFlying();
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -810,7 +825,7 @@ public class Pigeon extends AbstractCornerCreature {
     class PigeonLocateLoftGoal extends Goal {
 
         public boolean canUse() {
-            return Pigeon.this.remainingCooldownBeforeLocatingNewLoft == 0 && !Pigeon.this.hasLoft() && Pigeon.this.wantsToEnterLoft();
+            return Pigeon.this.remainingCooldownBeforeLocatingNewLoft == 0 && !Pigeon.this.hasLoft();
         }
 
         @Override
@@ -820,17 +835,10 @@ public class Pigeon extends AbstractCornerCreature {
 
         public void start() {
             Pigeon.this.remainingCooldownBeforeLocatingNewLoft = 200;
-            List<BlockPos> list = this.findNearbyLoftsWithSpace();
-            if (!list.isEmpty()) {
-                for(BlockPos blockPos : list) {
-                    if (!Pigeon.this.goToLoftGoal.isTargetBlacklisted(blockPos)) {
-                        Pigeon.this.setLoftPos(blockPos);
-                        return;
-                    }
-                }
 
+            if (findNearestLoftWithSpace() != null){
                 Pigeon.this.goToLoftGoal.clearBlacklist();
-                Pigeon.this.setLoftPos(list.get(0));
+                Pigeon.this.setLoftPos(findNearestLoftWithSpace());
             }
         }
 
@@ -839,8 +847,38 @@ public class Pigeon extends AbstractCornerCreature {
             PoiManager poiManager = ((ServerLevel)Pigeon.this.level()).getPoiManager();
             Stream<PoiRecord> stream = poiManager.getInRange((holder) -> holder.is(CCTags.POITypes.PIGEON_LOFT_POI), blockPos, 20, PoiManager.Occupancy.ANY);
 
-            return (List)stream.map(PoiRecord::getPos).filter(Pigeon.this::doesLoftHaveSpace).sorted(Comparator.comparingDouble(
+            return stream.map(PoiRecord::getPos).filter(Pigeon.this::doesLoftHaveSpace).sorted(Comparator.comparingDouble(
                     (blockPos2) -> blockPos2.distSqr(blockPos))).collect(Collectors.toList());
+        }
+        protected BlockPos findNearestLoftWithSpace() {
+            int i = 24;
+            int j = 3;
+            BlockPos blockpos = Pigeon.this.blockPosition();
+            BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+
+            for (int k = -1; k <= j; k = k > 0 ? -k : 1 - k) {
+                for (int l = 0; l < i; l++) {
+                    for (int i1 = 0; i1 <= l; i1 = i1 > 0 ? -i1 : 1 - i1) {
+                        for (int j1 = i1 < l && i1 > -l ? l : 0; j1 <= l; j1 = j1 > 0 ? -j1 : 1 - j1) {
+
+                            blockpos$mutableblockpos.setWithOffset(blockpos, i1, k - 1, j1);
+                            if (Pigeon.this.isWithinRestriction(blockpos$mutableblockpos) && this.isValidTarget(Pigeon.this.level(), blockpos$mutableblockpos)) {
+                                return blockpos$mutableblockpos;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        protected boolean isValidTarget(LevelReader level, BlockPos pos) {
+            BlockState state = level.getBlockState(pos);
+            if (state.is(CCBlocks.PIGEON_LOFT.get())){
+                return state.getValue(PigeonLoftBlock.PIGEONS) == 0;
+            }
+            return false;
         }
     }
 

@@ -99,7 +99,7 @@ public class BabyPigeonModel<T extends Pigeon> extends HierarchicalModel<T> {
 	public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay, int color) {
 		poseStack.pushPose();
 
-		poseStack.translate(0, -1, 0);
+		poseStack.translate(0, 0, 0);
 
 		root.render(poseStack, buffer, packedLight, packedOverlay, color);
 		poseStack.popPose();

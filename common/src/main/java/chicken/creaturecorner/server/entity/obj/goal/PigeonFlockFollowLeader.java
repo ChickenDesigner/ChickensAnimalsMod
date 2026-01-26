@@ -19,7 +19,7 @@ public class PigeonFlockFollowLeader extends Goal {
     }
 
     protected int nextStartTick(Pigeon taskOwner) {
-        return reducedTickDelay(200 + taskOwner.getRandom().nextInt(200) % 20);
+        return reducedTickDelay(100 + taskOwner.getRandom().nextInt(100) % 20);
     }
 
     @Override
@@ -47,7 +47,7 @@ public class PigeonFlockFollowLeader extends Goal {
 
     @Override
     public boolean canContinueToUse() {
-        return this.mob.isFollower() && this.mob.shouldMoveToLeader() && !this.mob.isTooCloseToLeader();
+        return this.mob.isFollower() && this.mob.shouldMoveToLeader() && !this.mob.isTooCloseToLeader() && this.mob.leader.canBeFollowed();
     }
 
     @Override
@@ -58,6 +58,9 @@ public class PigeonFlockFollowLeader extends Goal {
     @Override
     public void stop() {
         this.mob.stopFollowing();
+        if (this.mob.isFlying()){
+            this.mob.setFlyTicks(0);
+        }
     }
 
     @Override

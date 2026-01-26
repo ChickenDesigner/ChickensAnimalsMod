@@ -87,7 +87,7 @@ public class PigeonModel<T extends Pigeon> extends HierarchicalModel<T> {
 		if (entity.isSprinting()) {
 			this.animateWalk(PigeonAnims.RUN, limbSwing, limbSwingAmount*2, 1.5f, 1f);
 		} else {
-			this.animateWalk(PigeonAnims.WALK, limbSwing, limbSwingAmount*2, 2f, 2f);
+			this.animateWalk(PigeonAnims.WALK, limbSwing*2, limbSwingAmount*4, 2f, 2f);
 		}
 
 		if (!entity.onGround())

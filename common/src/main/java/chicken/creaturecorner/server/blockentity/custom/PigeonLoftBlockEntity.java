@@ -101,7 +101,6 @@ public class PigeonLoftBlockEntity extends BlockEntity {
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
         tag.put(PIGEONS_KEY, this.getPigeons());
-        this.setChanged();
     }
 
     public ListTag getPigeons() {
@@ -352,7 +351,7 @@ public class PigeonLoftBlockEntity extends BlockEntity {
             for (int i = 0; i < nbtList.size(); ++i) {
                 CompoundTag nbtCompound = nbtList.getCompound(i);
                 PigeonData pigeon = new PigeonData(nbtCompound.getCompound(ENTITY_DATA_KEY), nbtCompound.getInt(TICKS_IN_DWELLING_KEY), nbtCompound.getInt(MIN_OCCUPATION_TICKS_KEY));
-                this.pigeons.set(0, pigeon);
+                this.pigeons.add(pigeon);
             }
         }
     }

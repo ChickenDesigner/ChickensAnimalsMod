@@ -64,6 +64,13 @@ import java.util.UUID;
 import java.util.function.Predicate;
 
 public class CoyoteEntity extends GeoTamableEntity implements NeutralMob {
+
+    public final net.minecraft.world.entity.AnimationState scratchAnimationState = new net.minecraft.world.entity.AnimationState();
+    public final net.minecraft.world.entity.AnimationState idleAnimationState = new net.minecraft.world.entity.AnimationState();
+    public final net.minecraft.world.entity.AnimationState idleTongueAnimationState = new net.minecraft.world.entity.AnimationState();
+    public final net.minecraft.world.entity.AnimationState howlAnimationState = new net.minecraft.world.entity.AnimationState();
+    private int scratchTimeout;
+    
     private static final UniformInt PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
     private UUID persistentAngerTarget;
 //    private boolean attackedOnce;
@@ -92,7 +99,7 @@ public class CoyoteEntity extends GeoTamableEntity implements NeutralMob {
         //this.goalSelector.addGoal(1, new GeoTamableEntity.TamableAnimalPanicGoal((double) 1.5F, DamageTypeTags.PANIC_ENVIRONMENTAL_CAUSES));
         this.goalSelector.addGoal(2, new ModSitWhenOrdererdGoal(this));
         this.goalSelector.addGoal(3, new MeleeAttackGoal(this, (double) 2.0F, true));
-        this.goalSelector.addGoal(5, new CoyoteAvoidGoal<Player>(this, Player.class, 6.0F, 1.25f, 1.5f));
+        this.goalSelector.addGoal(5, new CoyoteAvoidGoal<Player>(this, Player.class, 6.0F, 1.2f, 1.5f));
         this.goalSelector.addGoal(7, new BreedGoal(this, (double) 1.0F));
         this.goalSelector.addGoal(8, new WaterAvoidingRandomStrollGoal(this, (double) 1.0F) {
             public boolean canUse() {
@@ -146,23 +153,23 @@ public class CoyoteEntity extends GeoTamableEntity implements NeutralMob {
     }
 
     public void tick() {
+        if (this.level().isClientSide()){
+            this.setupAnimationStates();
+        }
         super.tick();
         if (!this.isBaby() && !this.isAggressive()) {
             if (this.getRandom().nextInt(5000) == 0 && !this.isScratching() && this.onGround() && !this.orderedToSit && this.navigation.isDone()) {
                 this.setScratchingTime(83);
             }
 
-            if (this.getScratchingTime() > 0 && !this.orderedToSit) {
+            if (this.getScratchingTime() > 0) {
                 this.goalSelector.getAvailableGoals().forEach(WrappedGoal::stop);
                 this.getNavigation().stop();
-                if (!this.isScratching()) {
-                    this.setIsScratching(true);
-                }
-
                 this.prevScratchTime = this.getScratchingTime();
                 this.setScratchingTime(this.prevScratchTime - 1);
-            } else if (this.isScratching()) {
-                this.setIsScratching(false);
+
+                if (this.isOrderedToSit())
+                    this.setScratchingTime(0);
             }
         }
 
@@ -180,14 +187,12 @@ public class CoyoteEntity extends GeoTamableEntity implements NeutralMob {
         super.readAdditionalSaveData(pCompound);
         this.setVariant(pCompound.getBoolean("IsVariant"));
         this.setScratchingTime(pCompound.getInt("scratchingTime"));
-        this.setIsScratching(pCompound.getBoolean("isScratching"));
     }
 
     public void addAdditionalSaveData(CompoundTag pCompound) {
         super.addAdditionalSaveData(pCompound);
         pCompound.putBoolean("IsVariant", this.getVariant());
         pCompound.putInt("scratchingTime", this.getScratchingTime());
-        pCompound.putBoolean("isScratching", this.isScratching());
     }
 
     public int getScratchingTime() {
@@ -199,12 +204,9 @@ public class CoyoteEntity extends GeoTamableEntity implements NeutralMob {
     }
 
     public boolean isScratching() {
-        return (Boolean) this.entityData.get(SCRATCHING);
+        return this.getScratchingTime()>0;
     }
 
-    public void setIsScratching(boolean isScratching) {
-        this.entityData.set(SCRATCHING, isScratching);
-    }
 
     private void setVariant(boolean isVariant) {
         this.entityData.set(IS_VARIANT, isVariant);
@@ -269,8 +271,8 @@ public class CoyoteEntity extends GeoTamableEntity implements NeutralMob {
     }
 
     @Override
-    public double getBoneResetTime() {
-        return 15;
+    public void registerControllers(AnimatableManager.ControllerRegistrar controllerRegistrar) {
+
     }
 
     public boolean canPickUpLoot() {
@@ -319,6 +321,19 @@ public class CoyoteEntity extends GeoTamableEntity implements NeutralMob {
             this.setFoodLevel(food + 25);
         }
 
+    }
+
+    public void customServerAiStep() {
+        if (this.getMoveControl().hasWanted()) {
+            double d0 = this.getMoveControl().getSpeedModifier();
+            this.setPose(Pose.STANDING);
+            this.setSprinting(d0 >= 1.25D);
+        } else {
+            this.setPose(Pose.STANDING);
+            this.setSprinting(false);
+        }
+
+        super.customServerAiStep();
     }
 
     public void aiStep() {
@@ -388,10 +403,6 @@ public class CoyoteEntity extends GeoTamableEntity implements NeutralMob {
         return super.canAttack(target);
     }
 
-//    public boolean isAlliedTo(Entity entity) {
-//        return this.getLastHurtMob() == entity ? false : super.isAlliedTo(entity);
-//    }
-
     public AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
         CoyoteEntity baby = (CoyoteEntity) CCEntities.COYOTE_TYPE.get().create(serverLevel);
         if (baby != null && ageableMob instanceof CoyoteEntity otherParent) {
@@ -436,53 +447,18 @@ public class CoyoteEntity extends GeoTamableEntity implements NeutralMob {
         return 16;
     }
 
-    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController(this, "moveIdleController", 2, this::moveIdleController));
-        controllers.add(new AnimationController(this, "tameController", 0, this::tameController));
-    }
+    private void setupAnimationStates() {
 
-    protected static final RawAnimation COYOTE_IDLE = RawAnimation.begin().thenLoop("animation.coyote.idle");
-    protected static final RawAnimation COYOTE_WALK = RawAnimation.begin().thenLoop("animation.coyote.walk");
-    protected static final RawAnimation COYOTE_RUN = RawAnimation.begin().thenLoop("animation.coyote.run");
-    protected static final RawAnimation COYOTE_SIT = RawAnimation.begin().thenLoop("animation.coyote.sit");
-    protected static final RawAnimation COYOTE_SCRATCH = RawAnimation.begin().thenPlay("animation.coyote.ear_scratch");
-    protected static final RawAnimation COYOTE_TAME = RawAnimation.begin().thenLoop("animation.coyote.tamed");
-    protected static final RawAnimation BABY_COYOTE_IDLE = RawAnimation.begin().thenLoop("animation.coyote.baby_idle");
-    protected static final RawAnimation BABY_COYOTE_WALK = RawAnimation.begin().thenLoop("animation.coyote.baby_walk");
-    protected static final RawAnimation BABY_COYOTE_RUN = RawAnimation.begin().thenLoop("animation.coyote.baby_run");
-    protected static final RawAnimation BABY_COYOTE_SIT = RawAnimation.begin().thenLoop("animation.coyote.baby_sit");
+        this.idleAnimationState.animateWhen(true, this.tickCount);
+        this.idleTongueAnimationState.animateWhen(this.isAlive() && this.isTame(), this.tickCount);
 
-    private PlayState tameController(AnimationState<CoyoteEntity> state) {
-        return !state.getAnimatable().isDeadOrDying() && state.getAnimatable().isTame() && !state.getAnimatable().isBaby() ? state.setAndContinue(COYOTE_TAME) : PlayState.STOP;
-    }
-
-    private PlayState moveIdleController(AnimationState<CoyoteEntity> state) {
-        if (!state.getAnimatable().isDeadOrDying()) {
-
-            if (this.isInSittingPose()) {
-                System.out.println("sitting");
-                return state.setAndContinue(state.getAnimatable().isBaby() ? BABY_COYOTE_SIT : COYOTE_SIT);
-
-            }   else if (state.isMoving()) {
-
-                if (state.getAnimatable().isAggressive()){
-                    return state.setAndContinue(state.getAnimatable().isBaby() ? BABY_COYOTE_RUN : COYOTE_RUN);
-                }else{
-                    return state.setAndContinue(state.getAnimatable().isBaby() ? BABY_COYOTE_WALK : COYOTE_WALK);
-                }
-
-            } else if (state.getAnimatable().isScratching() && !state.getAnimatable().isBaby() && !state.isMoving()) {
-
-                return state.setAndContinue(COYOTE_SCRATCH);
-
-            } else {
-
-                return state.setAndContinue(state.getAnimatable().isBaby() ? BABY_COYOTE_IDLE : COYOTE_IDLE);
-
-            }
+        if(this.isScratching() && scratchTimeout <= 0) {
+            scratchTimeout = 82;
+            scratchAnimationState.start(this.tickCount);
         } else {
-            return PlayState.STOP;
+            --this.scratchTimeout;
         }
+
     }
 
     public int getRemainingPersistentAngerTime() {
@@ -629,5 +605,7 @@ public class CoyoteEntity extends GeoTamableEntity implements NeutralMob {
     public static boolean checkCoyoteSpawnRules(EntityType<CoyoteEntity> entityType, LevelAccessor level, MobSpawnType spawnType, BlockPos pos, RandomSource random) {
         return level.getBlockState(pos.below()).is(BlockTags.ARMADILLO_SPAWNABLE_ON) && isBrightEnoughToSpawn(level, pos);
     }
+
+
 
 }

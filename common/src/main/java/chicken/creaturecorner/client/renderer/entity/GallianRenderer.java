@@ -2,8 +2,8 @@ package chicken.creaturecorner.client.renderer.entity;
 
 import chicken.creaturecorner.CCConstants;
 import chicken.creaturecorner.client.CCModelLayers;
-import chicken.creaturecorner.client.model.entity.GallianChickModel;
-import chicken.creaturecorner.client.model.entity.GallianModel;
+import chicken.creaturecorner.client.model.entity.gallian.GallianChickModel;
+import chicken.creaturecorner.client.model.entity.gallian.GallianModel;
 import chicken.creaturecorner.server.entity.obj.GallianEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.model.HierarchicalModel;

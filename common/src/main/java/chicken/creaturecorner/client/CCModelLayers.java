@@ -8,19 +8,23 @@ public class CCModelLayers {
 
     public static final ModelLayerLocation GALLIAN =
             new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(CCConstants.MOD_ID, "gallian"), "main");
-
     public static final ModelLayerLocation GALLIAN_CHICK =
             new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(CCConstants.MOD_ID, "gallian_chick"), "main");
-
 
     public static final ModelLayerLocation PIGEON =
             new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(CCConstants.MOD_ID, "pigeon"), "main");
     public static final ModelLayerLocation BABY_PIGEON =
             new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(CCConstants.MOD_ID, "baby_pigeon"), "main");
+
     public static final ModelLayerLocation ENDOVE =
             new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(CCConstants.MOD_ID, "endove"), "main");
     public static final ModelLayerLocation BABY_ENDOVE =
             new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(CCConstants.MOD_ID, "baby_endove"), "main");
+
+    public static final ModelLayerLocation COYOTE =
+            new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(CCConstants.MOD_ID, "coyote"), "main");
+    public static final ModelLayerLocation BABY_COYOTE =
+            new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(CCConstants.MOD_ID, "baby_coyote"), "main");
 
     public static final ModelLayerLocation PIGEON_LOFT =
             new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(CCConstants.MOD_ID, "pigeon_loft"), "main");

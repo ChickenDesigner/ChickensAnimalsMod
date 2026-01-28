@@ -2,7 +2,6 @@ package chicken.creaturecorner.server.entity.obj;
 
 
 import chicken.creaturecorner.server.block.CCBlocks;
-import chicken.creaturecorner.server.block.CCPoiTypes;
 import chicken.creaturecorner.server.block.obj.custom.PigeonLoftBlock;
 import chicken.creaturecorner.server.blockentity.CCBlockEntities;
 import chicken.creaturecorner.server.blockentity.custom.PigeonLoftBlockEntity;
@@ -15,7 +14,6 @@ import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -27,7 +25,6 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.tags.PoiTypeTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.VisibleForDebug;
 import net.minecraft.world.DifficultyInstance;
@@ -46,7 +43,6 @@ import net.minecraft.world.entity.ai.util.HoverRandomPos;
 import net.minecraft.world.entity.ai.util.LandRandomPos;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiRecord;
-import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.animal.*;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -64,8 +60,6 @@ import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
-import software.bernie.geckolib.animation.*;
-import software.bernie.geckolib.animation.AnimationState;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -130,11 +124,6 @@ public class Pigeon extends AbstractCornerCreature {
 
         this.goalSelector.addGoal(2, new BreedGoal(this, 1, Pigeon.class));
         this.goalSelector.addGoal(8, new PigeonFlyGoal());
-    }
-
-    @Override
-    public void registerControllers(AnimatableManager.ControllerRegistrar controllerRegistrar) {
-
     }
 
     class PigeonWaterAvoidingRandomStrollGoal extends RandomStrollGoal{

@@ -56,8 +56,6 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.Vec3;
-import software.bernie.geckolib.animation.*;
-import software.bernie.geckolib.animation.AnimationState;
 
 import java.util.List;
 import java.util.UUID;
@@ -268,11 +266,6 @@ public class CoyoteEntity extends GeoTamableEntity implements NeutralMob {
         } else {
             return super.mobInteract(player, hand);
         }
-    }
-
-    @Override
-    public void registerControllers(AnimatableManager.ControllerRegistrar controllerRegistrar) {
-
     }
 
     public boolean canPickUpLoot() {

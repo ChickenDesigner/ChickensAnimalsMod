@@ -45,15 +45,14 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
-import software.bernie.geckolib.animation.*;
-import software.bernie.geckolib.animation.AnimationState;
 
 import java.util.*;
 import java.util.function.Predicate;
 
-//todo: make caracaras not touch the floor while moving and flying, if their navigation is done then don't make them not touch the floor.
-
 public class CaracaraEntity extends AbstractCornerCreature implements NeutralMob {
+
+    public final AnimationState idleAnimationState = new AnimationState();
+
     private static final UniformInt PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
     
     private UUID persistentAngerTarget;
@@ -61,6 +60,7 @@ public class CaracaraEntity extends AbstractCornerCreature implements NeutralMob
     private LookForFoodGoal forFoodGoal;
     private static final EntityDataAccessor<Integer> DATA_REMAINING_ANGER_TIME;
     private static final EntityDataAccessor<Integer> FLY_TICKS;
+    private static final EntityDataAccessor<Integer> IN_FLIGHT_TICKS;
     private static final EntityDataAccessor<Boolean> FLYING;
     private static final EntityDataAccessor<Boolean> DIVING;
     public AttackPhase attackPhase;
@@ -86,11 +86,6 @@ public class CaracaraEntity extends AbstractCornerCreature implements NeutralMob
 
     public boolean canFly() {
         return this.wantsToFly && !this.isBaby();
-    }
-
-    @Override
-    public double getBoneResetTime() {
-        return 15;
     }
 
     public boolean killedEntity(ServerLevel level, LivingEntity entity) {
@@ -144,6 +139,7 @@ public class CaracaraEntity extends AbstractCornerCreature implements NeutralMob
     protected void defineSynchedData(SynchedEntityData.@NotNull Builder builder) {
         super.defineSynchedData(builder);
         builder.define(FLY_TICKS, 0);
+        builder.define(IN_FLIGHT_TICKS, 0);
         builder.define(FLYING, false);
         builder.define(DIVING, false);
         builder.define(DATA_REMAINING_ANGER_TIME, 0);
@@ -167,6 +163,14 @@ public class CaracaraEntity extends AbstractCornerCreature implements NeutralMob
 
     public void setFlyTicks(int ticks) {
         this.entityData.set(FLY_TICKS, ticks);
+    }
+
+    public int getInFlightTicks() {
+        return (Integer)this.entityData.get(IN_FLIGHT_TICKS);
+    }
+
+    public void setInFlightTicks(int ticks) {
+        this.entityData.set(IN_FLIGHT_TICKS, ticks);
     }
 
     public void setFlying(boolean flight) {
@@ -317,6 +321,16 @@ public class CaracaraEntity extends AbstractCornerCreature implements NeutralMob
             }
         }
 
+        if (this.isFlying() && this.getInFlightTicks()<5) {
+            int prevFlightTicks = this.getInFlightTicks();
+            this.setInFlightTicks(prevFlightTicks+1);
+        }
+
+        if (!this.isFlying() && this.getInFlightTicks()>0) {
+            int prevFlightTicks = this.getInFlightTicks();
+            this.setInFlightTicks(prevFlightTicks-1);
+        }
+
         LivingEntity var3 = this.getTarget();
         if (var3 instanceof Pigeon pigeon) {
             if (this.canFly() && pigeon.isFlying() && this.random.nextInt(10) == 0) {
@@ -342,21 +356,6 @@ public class CaracaraEntity extends AbstractCornerCreature implements NeutralMob
         }
 
         return entity;
-    }
-
-    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController(this, "moveFlyIdleController", 3, this::moveFlyController));
-    }
-
-    private PlayState moveFlyController(AnimationState<CaracaraEntity> state) {
-        CaracaraEntity entity = (CaracaraEntity)state.getAnimatable();
-        if (!entity.isInWater() && !entity.onGround()) {
-            return entity.isDiving() ? state.setAndContinue(RawAnimation.begin().thenLoop("dive")) : state.setAndContinue(RawAnimation.begin().thenLoop("fly"));
-        } else if (entity.onGround() && entity.getDeltaMovement().horizontalDistanceSqr() > 1.0E-4) {
-            return entity.isAggressive() ? state.setAndContinue(RawAnimation.begin().thenLoop("run")) : state.setAndContinue(RawAnimation.begin().thenLoop("walk"));
-        } else {
-            return state.setAndContinue(RawAnimation.begin().thenLoop("idle"));
-        }
     }
 
     public int getRemainingPersistentAngerTime() {
@@ -451,6 +450,7 @@ public class CaracaraEntity extends AbstractCornerCreature implements NeutralMob
     static {
         DATA_REMAINING_ANGER_TIME = SynchedEntityData.defineId(CaracaraEntity.class, EntityDataSerializers.INT);
         FLY_TICKS = SynchedEntityData.defineId(CaracaraEntity.class, EntityDataSerializers.INT);
+        IN_FLIGHT_TICKS = SynchedEntityData.defineId(CaracaraEntity.class, EntityDataSerializers.INT);
         FLYING = SynchedEntityData.defineId(CaracaraEntity.class, EntityDataSerializers.BOOLEAN);
         DIVING = SynchedEntityData.defineId(CaracaraEntity.class, EntityDataSerializers.BOOLEAN);
     }

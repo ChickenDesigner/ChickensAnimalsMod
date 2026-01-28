@@ -7,12 +7,9 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.level.Level;
-import software.bernie.geckolib.animatable.GeoEntity;
-import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.util.GeckoLibUtil;
 
-public abstract class AbstractCornerCreature extends Animal implements GeoEntity {
-    private final AnimatableInstanceCache geoCache = GeckoLibUtil.createInstanceCache(this);
+public abstract class AbstractCornerCreature extends Animal {
+
     protected static final EntityDataAccessor<Integer> FOOD_LEVEL = SynchedEntityData.defineId(AbstractCornerCreature.class, EntityDataSerializers.INT);
     public AbstractCornerCreature(EntityType<? extends Animal> entityType, Level level) {
         super(entityType, level);
@@ -81,11 +78,6 @@ public abstract class AbstractCornerCreature extends Animal implements GeoEntity
 
     public boolean childVariants() {
         return false;
-    }
-
-    @Override
-    public final AnimatableInstanceCache getAnimatableInstanceCache() {
-        return geoCache;
     }
 
     public String getVariantName() {

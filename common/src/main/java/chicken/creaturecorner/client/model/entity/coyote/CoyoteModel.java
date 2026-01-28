@@ -3,7 +3,6 @@ package chicken.creaturecorner.client.model.entity.coyote;// Made with Blockbenc
 // Paste this class into your mod and generate all required imports
 
 import chicken.creaturecorner.client.animation.CoyoteAnims;
-import chicken.creaturecorner.client.animation.GallianAnims;
 import chicken.creaturecorner.server.entity.obj.CoyoteEntity;
 import net.minecraft.client.model.HierarchicalModel;
 import com.mojang.blaze3d.vertex.PoseStack;

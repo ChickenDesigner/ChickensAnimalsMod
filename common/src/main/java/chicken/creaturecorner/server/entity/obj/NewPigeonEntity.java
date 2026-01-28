@@ -40,8 +40,6 @@ import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
-import software.bernie.geckolib.animation.*;
-import software.bernie.geckolib.animation.AnimationState;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -80,10 +78,6 @@ public class NewPigeonEntity extends AbstractCornerCreature {
     /*
     Animations
      */
-    protected static final RawAnimation PIGEON_IDLE = RawAnimation.begin().thenLoop("animation.pigeon.idle");
-    protected static final RawAnimation PIGEON_WALK = RawAnimation.begin().thenLoop("animation.pigeon.walk");
-    protected static final RawAnimation PIGEON_PANIC = RawAnimation.begin().thenLoop("animation.pigeon.run");
-    protected static final RawAnimation PIGEON_FLY = RawAnimation.begin().thenLoop("animation.pigeon.fly");
 
     public NewPigeonEntity(EntityType<? extends Animal> entityType, Level level) {
         super(entityType, level);
@@ -181,22 +175,6 @@ public class NewPigeonEntity extends AbstractCornerCreature {
 
         return spawnGroupData;
     }
-
-    @Override
-    public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "moveFlyIdleController", 2, this::moveFlyController));
-    }
-
-    private PlayState moveFlyController(AnimationState<NewPigeonEntity> state) {
-        NewPigeonEntity entity = state.getAnimatable();
-        if (entity.onGround()) {
-            if(state.isMoving()) return state.setAndContinue(entity.getPanic() ? PIGEON_PANIC : PIGEON_WALK);
-        } else if (!entity.isInWater() && !entity.onGround()) {
-            return state.setAndContinue(PIGEON_FLY);
-        }
-        return state.setAndContinue(PIGEON_IDLE);
-    }
-
 
     @Override
     protected void defineSynchedData(SynchedEntityData.@NotNull Builder builder) {

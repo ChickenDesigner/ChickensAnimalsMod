@@ -26,6 +26,11 @@ public class CCModelLayers {
     public static final ModelLayerLocation BABY_COYOTE =
             new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(CCConstants.MOD_ID, "baby_coyote"), "main");
 
+    public static final ModelLayerLocation CARACARA =
+            new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(CCConstants.MOD_ID, "caracara"), "main");
+    public static final ModelLayerLocation BABY_CARACARA =
+            new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(CCConstants.MOD_ID, "baby_caracara"), "main");
+
     public static final ModelLayerLocation PIGEON_LOFT =
             new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(CCConstants.MOD_ID, "pigeon_loft"), "main");
     public static final ModelLayerLocation BABY_PIGEON_LOFT =

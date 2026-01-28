@@ -152,11 +152,6 @@ public class Endove extends Pigeon {
     }
 
     @Override
-    public double getBoneResetTime() {
-        return 15;
-    }
-
-    @Override
     public SpawnGroupData finalizeSpawn(@NotNull ServerLevelAccessor level, @NotNull DifficultyInstance difficulty, @NotNull MobSpawnType spawnType, SpawnGroupData spawnGroupData) {
         return super.finalizeSpawn(level, difficulty, spawnType, spawnGroupData);
     }

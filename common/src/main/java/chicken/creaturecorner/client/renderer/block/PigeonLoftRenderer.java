@@ -52,7 +52,8 @@ public class PigeonLoftRenderer implements BlockEntityRenderer<PigeonLoftBlockEn
 
             float f = (float)pBlockEntity.time + pPartialTick;
 
-            if (pBlockEntity.getBlockState().getValue(PigeonLoftBlock.PIGEONS) > 0){
+            if (pBlockEntity.getBlockState().getValue(PigeonLoftBlock.PIGEONS) > 0 &&
+                    pBlockEntity.getBlockState().getValue(PigeonLoftBlock.PIGEON_TYPE) != PigeonLoftBlock.PigeonType.NONE){
                 Material MATERIAL = new Material(TextureAtlas.LOCATION_BLOCKS,
                         ResourceLocation.fromNamespaceAndPath(CCConstants.MOD_ID, "entity/pigeon/pigeon_" +
                                 pBlockEntity.getBlockState().getValue(PigeonLoftBlock.PIGEON_TYPE).toString()));

@@ -236,6 +236,7 @@ public class PigeonLoftBlock extends BaseEntityBlock {
     }
 
     public enum PigeonType implements StringRepresentable {
+        NONE("none"),
         ADULT_GREY("grey"),
         BABY_GREY("baby_grey_asleep"),
         ADULT_WHITE("white"),

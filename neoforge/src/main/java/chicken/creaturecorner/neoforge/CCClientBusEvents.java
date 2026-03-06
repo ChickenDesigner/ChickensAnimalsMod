@@ -19,6 +19,7 @@ import chicken.creaturecorner.client.renderer.entity.*;
 import chicken.creaturecorner.server.blockentity.CCBlockEntities;
 import chicken.creaturecorner.server.entity.CCEntities;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 import net.minecraft.world.entity.EntityType;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -33,11 +34,15 @@ public class CCClientBusEvents {
 
     @SubscribeEvent
     public static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerEntityRenderer(CCEntities.COYOTE_TYPE.get(), CoyoteRenderer::new);
-        event.registerEntityRenderer(CCEntities.CARACARA_TYPE.get(), CaracaraRenderer::new);
+        event.registerEntityRenderer(CCEntities.COYOTE.get(), CoyoteRenderer::new);
+        event.registerEntityRenderer(CCEntities.CARACARA.get(), CaracaraRenderer::new);
         event.registerEntityRenderer(CCEntities.ENDOVE.get(), EndoveRenderer::new);
         event.registerEntityRenderer(CCEntities.PIGEON.get(), PigeonRenderer::new);
         event.registerEntityRenderer(CCEntities.GALLIAN.get(), GallianRenderer::new);
+
+        event.registerEntityRenderer(CCEntities.CARACARA_EGG.get(), ThrownItemRenderer::new);
+        event.registerEntityRenderer(CCEntities.ENDOVE_EGG.get(), ThrownItemRenderer::new);
+        event.registerEntityRenderer(CCEntities.PIGEON_EGG.get(), ThrownItemRenderer::new);
 
 
         event.registerBlockEntityRenderer(CCBlockEntities.PIGEON_LOFT.get(), PigeonLoftRenderer::new);

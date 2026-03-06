@@ -29,15 +29,15 @@ public class CCEntitySpawns {
     public static void init() {
         SpawnPlacements.register(CCEntities.PIGEON.get(), SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Pigeon::checkAnimalSpawnRules);
         SpawnPlacements.register(CCEntities.ENDOVE.get(), SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Endove::canEndoveSpawn);
-        SpawnPlacements.register(CCEntities.CARACARA_TYPE.get(), SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, CaracaraEntity::checkAnimalSpawnRules);
-        SpawnPlacements.register(CCEntities.COYOTE_TYPE.get(), SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, CoyoteEntity::checkCoyoteSpawnRules);
+        SpawnPlacements.register(CCEntities.CARACARA.get(), SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, CaracaraEntity::checkAnimalSpawnRules);
+        SpawnPlacements.register(CCEntities.COYOTE.get(), SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, CoyoteEntity::checkCoyoteSpawnRules);
 
         BiomeModifications.addSpawn(
-                biomeSelectionContext -> biomeSelectionContext.hasTag(caracaraBiome), MobCategory.CREATURE, CCEntities.CARACARA_TYPE.get()
+                biomeSelectionContext -> biomeSelectionContext.hasTag(caracaraBiome), MobCategory.CREATURE, CCEntities.CARACARA.get()
                 , 8, 2, 5
         );
         BiomeModifications.addSpawn(
-                biomeSelectionContext -> biomeSelectionContext.hasTag(coyoteBiome), MobCategory.CREATURE, CCEntities.COYOTE_TYPE.get()
+                biomeSelectionContext -> biomeSelectionContext.hasTag(coyoteBiome), MobCategory.CREATURE, CCEntities.COYOTE.get()
                 , 8, 2, 5
         );
         BiomeModifications.addSpawn(

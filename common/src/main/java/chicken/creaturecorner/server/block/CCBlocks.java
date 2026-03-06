@@ -1,8 +1,10 @@
 package chicken.creaturecorner.server.block;
 
 import chicken.creaturecorner.platform.Services;
+import chicken.creaturecorner.server.block.obj.custom.CaracaraNestBlock;
 import chicken.creaturecorner.server.block.obj.custom.GallianEggBlock;
 import chicken.creaturecorner.server.block.obj.custom.PigeonLoftBlock;
+import chicken.creaturecorner.server.block.obj.custom.PigeonNestBlock;
 import chicken.creaturecorner.server.item.CCItems;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
@@ -18,10 +20,18 @@ public class CCBlocks {
 
 
     public static final Supplier<Block> GALLIAN_EGG = register("gallian_egg",
-            () -> new GallianEggBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.TURTLE_EGG)));
+            () -> new GallianEggBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.TURTLE_EGG).randomTicks()));
 
     public static final Supplier<Block> PIGEON_LOFT = register("pigeon_loft",
             () -> new PigeonLoftBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PLANKS).noOcclusion()));
+
+    public static final Supplier<Block> CARACARA_NEST = register("caracara_nest",
+            () -> new CaracaraNestBlock(BlockBehaviour.Properties.of().noOcclusion().ignitedByLava().sound(SoundType.GRASS).randomTicks()));
+
+    public static final Supplier<Block> PIGEON_NEST = register("pigeon_nest",
+            () -> new PigeonNestBlock(BlockBehaviour.Properties.of().noOcclusion().ignitedByLava().sound(SoundType.GRASS).randomTicks()));
+    public static final Supplier<Block> ENDOVE_NEST = register("endove_nest",
+            () -> new PigeonNestBlock(BlockBehaviour.Properties.of().noOcclusion().ignitedByLava().sound(SoundType.GRASS).randomTicks()));
 
 
     public static Supplier<Block> register(String s, Supplier<Block> block) {

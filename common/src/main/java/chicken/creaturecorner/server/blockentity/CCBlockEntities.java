@@ -18,7 +18,7 @@ public class CCBlockEntities {
     public static final Supplier<BlockEntityType<CCSignBlockEntity>> SIGN = register("sign",
             () -> Services.GENERIC.createBEType(CCSignBlockEntity::new));
 
-    public static final Supplier<BlockEntityType<PigeonLoftBlockEntity>> PIGEON_LOFT = register("pigeon_loft_entity",
+    public static final Supplier<BlockEntityType<PigeonLoftBlockEntity>> PIGEON_LOFT = register("pigeon_loft",
             () -> Services.GENERIC.createBEType(PigeonLoftBlockEntity::new, CCBlocks.PIGEON_LOFT.get()));
 
     public static<T extends BlockEntity> Supplier<BlockEntityType<T>> register(String s, Supplier<BlockEntityType<T>> block) {

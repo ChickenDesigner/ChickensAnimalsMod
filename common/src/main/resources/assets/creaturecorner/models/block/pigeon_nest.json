@@ -1,0 +1,7 @@
+{
+  "parent": "creaturecorner:block/pigeon_nest_base",
+  "textures": {
+    "texture": "creaturecorner:block/pigeon_nest",
+    "item": "creaturecorner:item/pigeon_nest"
+  }
+}

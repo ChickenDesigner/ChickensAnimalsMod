@@ -12,7 +12,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.animal.Animal;
@@ -28,7 +27,8 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 public class Endove extends Pigeon {
-    public Endove(EntityType<? extends Animal> entityType, Level level) {
+
+    public Endove(EntityType<? extends Pigeon> entityType, Level level) {
         super(entityType, level);
     }
 
@@ -36,7 +36,6 @@ public class Endove extends Pigeon {
     public boolean isSensitiveToWater() {
         return true;
     }
-
 
     public boolean hurt(@NotNull DamageSource pSource, float pAmount) {
         if (this.isInvulnerableTo(pSource)) {
@@ -149,11 +148,6 @@ public class Endove extends Pigeon {
         }
 
         return false;
-    }
-
-    @Override
-    public SpawnGroupData finalizeSpawn(@NotNull ServerLevelAccessor level, @NotNull DifficultyInstance difficulty, @NotNull MobSpawnType spawnType, SpawnGroupData spawnGroupData) {
-        return super.finalizeSpawn(level, difficulty, spawnType, spawnGroupData);
     }
 
     @Override

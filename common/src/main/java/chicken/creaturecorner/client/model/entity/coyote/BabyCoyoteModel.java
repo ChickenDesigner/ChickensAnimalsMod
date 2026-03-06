@@ -15,9 +15,13 @@ public class BabyCoyoteModel<T extends CoyoteEntity> extends HierarchicalModel<T
 
 	private final ModelPart root;
 	private final ModelPart coyote;
+	private final ModelPart leg_base1;
 	private final ModelPart leg1;
+	private final ModelPart leg_base2;
 	private final ModelPart leg2;
+	private final ModelPart leg_base3;
 	private final ModelPart leg3;
+	private final ModelPart leg_base4;
 	private final ModelPart leg4;
 	private final ModelPart body;
 	private final ModelPart head_rot;
@@ -30,17 +34,21 @@ public class BabyCoyoteModel<T extends CoyoteEntity> extends HierarchicalModel<T
 	public BabyCoyoteModel(ModelPart root) {
 		this.root = root.getChild("root");
 		this.coyote = this.root.getChild("coyote");
-		this.leg1 = this.coyote.getChild("leg1");
-		this.leg2 = this.coyote.getChild("leg2");
-		this.leg3 = this.coyote.getChild("leg3");
-		this.leg4 = this.coyote.getChild("leg4");
+		this.leg_base1 = this.coyote.getChild("leg_base1");
+		this.leg1 = this.leg_base1.getChild("leg1");
+		this.leg_base2 = this.coyote.getChild("leg_base2");
+		this.leg2 = this.leg_base2.getChild("leg2");
+		this.leg_base3 = this.coyote.getChild("leg_base3");
+		this.leg3 = this.leg_base3.getChild("leg3");
+		this.leg_base4 = this.coyote.getChild("leg_base4");
+		this.leg4 = this.leg_base4.getChild("leg4");
 		this.body = this.coyote.getChild("body");
 		this.head_rot = this.body.getChild("head_rot");
 		this.head = this.head_rot.getChild("head");
 		this.ear1 = this.head.getChild("ear1");
 		this.ear2 = this.head.getChild("ear2");
 		this.bally = this.body.getChild("bally");
-		this.tail = this.body.getChild("tail");
+		this.tail = this.bally.getChild("tail");
 	}
 
 	public static LayerDefinition createBodyLayer() {
@@ -51,29 +59,37 @@ public class BabyCoyoteModel<T extends CoyoteEntity> extends HierarchicalModel<T
 
 		PartDefinition coyote = root.addOrReplaceChild("coyote", CubeListBuilder.create(), PartPose.offset(0.0F, 0.0F, 0.0F));
 
-		PartDefinition leg1 = coyote.addOrReplaceChild("leg1", CubeListBuilder.create().texOffs(14, 18).addBox(-1.0F, 0.0F, -1.0F, 2.0F, 3.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(-1.5F, -3.0F, -3.0F));
+		PartDefinition leg_base1 = coyote.addOrReplaceChild("leg_base1", CubeListBuilder.create(), PartPose.offset(-1.5F, 0.0F, -3.0F));
 
-		PartDefinition leg2 = coyote.addOrReplaceChild("leg2", CubeListBuilder.create().texOffs(20, 21).addBox(-1.0F, 0.0F, -1.0F, 2.0F, 3.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(1.5F, -3.0F, -3.0F));
+		PartDefinition leg1 = leg_base1.addOrReplaceChild("leg1", CubeListBuilder.create().texOffs(14, 18).addBox(-1.0F, 0.0F, -1.0F, 2.0F, 3.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -3.0F, 0.0F));
 
-		PartDefinition leg3 = coyote.addOrReplaceChild("leg3", CubeListBuilder.create().texOffs(0, 19).addBox(-1.0F, 0.0F, -1.0F, 2.0F, 3.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(-1.5F, -3.0F, 2.0F));
+		PartDefinition leg_base2 = coyote.addOrReplaceChild("leg_base2", CubeListBuilder.create(), PartPose.offset(1.5F, 0.0F, -3.0F));
 
-		PartDefinition leg4 = coyote.addOrReplaceChild("leg4", CubeListBuilder.create().texOffs(8, 21).addBox(-1.0F, 0.0F, -1.0F, 2.0F, 3.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(1.5F, -3.0F, 2.0F));
+		PartDefinition leg2 = leg_base2.addOrReplaceChild("leg2", CubeListBuilder.create().texOffs(20, 21).addBox(-1.0F, 0.0F, -1.0F, 2.0F, 3.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -3.0F, 0.0F));
+
+		PartDefinition leg_base3 = coyote.addOrReplaceChild("leg_base3", CubeListBuilder.create(), PartPose.offset(-1.5F, 0.0F, 2.0F));
+
+		PartDefinition leg3 = leg_base3.addOrReplaceChild("leg3", CubeListBuilder.create().texOffs(0, 19).addBox(-1.0F, 0.0F, -1.0F, 2.0F, 3.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -3.0F, 0.0F));
+
+		PartDefinition leg_base4 = coyote.addOrReplaceChild("leg_base4", CubeListBuilder.create(), PartPose.offset(1.5F, 0.0F, 2.0F));
+
+		PartDefinition leg4 = leg_base4.addOrReplaceChild("leg4", CubeListBuilder.create().texOffs(8, 21).addBox(-1.0F, 0.0F, -1.0F, 2.0F, 3.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -3.0F, 0.0F));
 
 		PartDefinition body = coyote.addOrReplaceChild("body", CubeListBuilder.create(), PartPose.offset(0.0F, -4.0F, 2.0F));
 
 		PartDefinition head_rot = body.addOrReplaceChild("head_rot", CubeListBuilder.create(), PartPose.offset(0.5F, -2.0F, -6.0F));
 
 		PartDefinition head = head_rot.addOrReplaceChild("head", CubeListBuilder.create().texOffs(16, 11).addBox(-3.0F, -1.5F, -3.0F, 5.0F, 3.0F, 3.0F, new CubeDeformation(0.0F))
-		.texOffs(17, 0).addBox(-2.0F, 0.5F, -5.0F, 3.0F, 1.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
+				.texOffs(17, 0).addBox(-2.0F, 0.5F, -5.0F, 3.0F, 1.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 0.0F));
 
 		PartDefinition ear1 = head.addOrReplaceChild("ear1", CubeListBuilder.create().texOffs(0, 0).addBox(-1.0F, -2.5F, -1.0F, 2.0F, 2.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offset(-2.0F, -1.0F, 0.0F));
 
 		PartDefinition ear2 = head.addOrReplaceChild("ear2", CubeListBuilder.create().texOffs(0, 3).addBox(-1.0F, -2.5F, -1.0F, 2.0F, 2.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offset(1.0F, -1.0F, 0.0F));
 
-		PartDefinition bally = body.addOrReplaceChild("bally", CubeListBuilder.create().texOffs(0, 0).addBox(-2.5F, -2.0F, -4.0F, 5.0F, 4.0F, 7.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -1.0F, -2.0F));
+		PartDefinition bally = body.addOrReplaceChild("bally", CubeListBuilder.create().texOffs(0, 0).addBox(-2.5F, -4.0F, -1.0F, 5.0F, 4.0F, 7.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 1.0F, -5.0F));
 
-		PartDefinition tail = body.addOrReplaceChild("tail", CubeListBuilder.create().texOffs(1, 12).addBox(-1.5F, -1.5F, 0.0F, 3.0F, 3.0F, 4.0F, new CubeDeformation(0.0F))
-		.texOffs(24, 5).addBox(-1.5F, -1.5F, 4.0F, 3.0F, 3.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -1.5F, 1.0F, -0.7854F, 0.0F, 0.0F));
+		PartDefinition tail = bally.addOrReplaceChild("tail", CubeListBuilder.create().texOffs(1, 12).addBox(-1.5F, -1.5F, 0.0F, 3.0F, 3.0F, 4.0F, new CubeDeformation(0.0F))
+				.texOffs(24, 5).addBox(-1.5F, -1.5F, 4.0F, 3.0F, 3.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -2.5F, 6.0F, -0.7854F, 0.0F, 0.0F));
 
 		return LayerDefinition.create(meshdefinition, 32, 32);
 	}
@@ -93,7 +109,7 @@ public class BabyCoyoteModel<T extends CoyoteEntity> extends HierarchicalModel<T
 				this.animateWalk(CoyoteAnims.BABY_WALK, limbSwing*2, limbSwingAmount*2, 2f, 2f);
 			}
 
-//			this.animate(entity.scratchAnimationState, CoyoteAnims.EAR_SCRATCH, ageInTicks, 1);
+			this.animate(entity.scratchAnimationState, CoyoteAnims.BABY_EAR_SCRATCH, ageInTicks, 1);
 //			this.animate(entity.howlAnimationState, CoyoteAnims.HOWL, ageInTicks, 1);
 		}
 

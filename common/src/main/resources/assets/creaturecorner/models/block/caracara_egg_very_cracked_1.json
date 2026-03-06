@@ -1,0 +1,6 @@
+{
+  "parent": "creaturecorner:block/caracara_egg_1",
+  "textures": {
+    "texture": "creaturecorner:block/caracara_egg_very_cracked"
+  }
+}

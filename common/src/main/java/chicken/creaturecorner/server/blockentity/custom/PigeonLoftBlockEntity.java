@@ -6,6 +6,7 @@ import chicken.creaturecorner.server.entity.obj.Endove;
 import chicken.creaturecorner.server.entity.obj.Pigeon;
 import chicken.creaturecorner.server.sound.CCSounds;
 import com.google.common.collect.Lists;
+import com.mojang.datafixers.kinds.IdF;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -82,6 +83,7 @@ public class PigeonLoftBlockEntity extends BlockEntity {
 
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.loadAdditional(tag, registries);
         this.pigeons.clear();
 
         if (tag.contains(PIGEONS_KEY, 9)) {
@@ -93,14 +95,14 @@ public class PigeonLoftBlockEntity extends BlockEntity {
 
             this.pigeons.add(pigeon);
         }
-        super.loadAdditional(tag, registries);
         this.setChanged();
     }
 
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
-        tag.put(PIGEONS_KEY, this.getPigeons());
+        if (!this.isEmpty())
+            tag.put(PIGEONS_KEY, this.getPigeons());
     }
 
     public ListTag getPigeons() {
@@ -143,7 +145,7 @@ public class PigeonLoftBlockEntity extends BlockEntity {
                 }
             }
         }
-        return PigeonLoftBlock.PigeonType.ADULT_GREY;
+        return PigeonLoftBlock.PigeonType.NONE;
     }
 
     public Boolean isPigeonBaby(){
@@ -310,6 +312,12 @@ public class PigeonLoftBlockEntity extends BlockEntity {
     public static void clientTick(Level world, BlockPos pos, BlockState state, PigeonLoftBlockEntity blockEntity) {
         ++blockEntity.time;
 
+        if (!blockEntity.pigeons.isEmpty() && !blockEntity.hasPigeon ){
+            blockEntity.hasPigeon = true;
+        }
+        if (blockEntity.pigeons.isEmpty() && blockEntity.hasPigeon){
+            blockEntity.hasPigeon = false;
+        }
     }
 
     public static void serverTick(Level world, BlockPos pos, BlockState state, PigeonLoftBlockEntity blockEntity) {

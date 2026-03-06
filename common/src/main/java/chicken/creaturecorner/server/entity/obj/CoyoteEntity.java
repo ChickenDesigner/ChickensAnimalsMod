@@ -77,7 +77,7 @@ public class CoyoteEntity extends GeoTamableEntity implements NeutralMob {
     private final int scratchAnimTime = 83;
     private LookForFoodGoal forFoodGoal;
     private static final EntityDataAccessor<Integer> DATA_REMAINING_ANGER_TIME;
-    private static final EntityDataAccessor<Boolean> IS_VARIANT;
+    private static final EntityDataAccessor<Integer> VARIANT;
     private static final EntityDataAccessor<Integer> SCRATCHING_TIME;
     private static final EntityDataAccessor<Boolean> SCRATCHING;
 
@@ -155,7 +155,7 @@ public class CoyoteEntity extends GeoTamableEntity implements NeutralMob {
             this.setupAnimationStates();
         }
         super.tick();
-        if (!this.isBaby() && !this.isAggressive()) {
+        if (!this.isAggressive()) {
             if (this.getRandom().nextInt(5000) == 0 && !this.isScratching() && this.onGround() && !this.orderedToSit && this.navigation.isDone()) {
                 this.setScratchingTime(83);
             }
@@ -175,7 +175,7 @@ public class CoyoteEntity extends GeoTamableEntity implements NeutralMob {
 
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
-        builder.define(IS_VARIANT, false);
+        builder.define(VARIANT, 0);
         builder.define(DATA_REMAINING_ANGER_TIME, 0);
         builder.define(SCRATCHING_TIME, 0);
         builder.define(SCRATCHING, false);
@@ -183,13 +183,13 @@ public class CoyoteEntity extends GeoTamableEntity implements NeutralMob {
 
     public void readAdditionalSaveData(CompoundTag pCompound) {
         super.readAdditionalSaveData(pCompound);
-        this.setVariant(pCompound.getBoolean("IsVariant"));
+        this.setVariant(pCompound.getInt("Variant"));
         this.setScratchingTime(pCompound.getInt("scratchingTime"));
     }
 
     public void addAdditionalSaveData(CompoundTag pCompound) {
         super.addAdditionalSaveData(pCompound);
-        pCompound.putBoolean("IsVariant", this.getVariant());
+        pCompound.putInt("Variant", this.getVariant());
         pCompound.putInt("scratchingTime", this.getScratchingTime());
     }
 
@@ -206,12 +206,12 @@ public class CoyoteEntity extends GeoTamableEntity implements NeutralMob {
     }
 
 
-    private void setVariant(boolean isVariant) {
-        this.entityData.set(IS_VARIANT, isVariant);
+    private void setVariant(int variant) {
+        this.entityData.set(VARIANT, variant);
     }
 
-    public boolean getVariant() {
-        return (Boolean) this.entityData.get(IS_VARIANT);
+    public int getVariant() {
+        return this.entityData.get(VARIANT);
     }
 
     public void travel(Vec3 pTravelVector) {
@@ -397,18 +397,16 @@ public class CoyoteEntity extends GeoTamableEntity implements NeutralMob {
     }
 
     public AgeableMob getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
-        CoyoteEntity baby = (CoyoteEntity) CCEntities.COYOTE_TYPE.get().create(serverLevel);
+        CoyoteEntity baby = CCEntities.COYOTE.get().create(serverLevel);
+
         if (baby != null && ageableMob instanceof CoyoteEntity otherParent) {
-            if (!this.getVariant() == otherParent.getVariant()) {
-                if (baby != null) {
-                    baby.setVariant(this.random.nextBoolean());
-                }
-            } else if (this.getVariant() && otherParent.getVariant()) {
-                if (baby != null) {
-                    baby.setVariant(true);
-                }
-            } else if (baby != null) {
-                baby.setVariant(this.random.nextFloat() <= 0.15F);
+            if (this.random.nextInt(0, 10) == 0)
+                baby.setVariant(3);
+            else {
+                if (this.getRandom().nextBoolean())
+                    baby.setVariant(this.getVariant());
+                else
+                    baby.setVariant(otherParent.getVariant());
             }
         }
 
@@ -419,17 +417,21 @@ public class CoyoteEntity extends GeoTamableEntity implements NeutralMob {
 
         Holder<Biome> holder = level.getBiome(this.blockPosition());
 
-        if (holder.is(BiomeTags.SPAWNS_COLD_VARIANT_FROGS)) {
-            this.setVariant(this.getRandom().nextInt(0, 10) > 8);
-        } else {
-            this.setVariant(this.getRandom().nextInt(0, 100) > 98);
-        }
+        if (holder.is(BiomeTags.SPAWNS_COLD_VARIANT_FROGS) && holder.is(BiomeTags.IS_OVERWORLD) && this.getRandom().nextInt(0, 10) == 0)
+            this.setVariant(3);
+        else
+            this.setVariant(this.random.nextInt(0, 3));
 
         return super.finalizeSpawn(level, difficulty, spawnType, spawnGroupData);
     }
 
     public String getVariantName() {
-        return this.getVariant() ? "white" : "orange";
+        return switch (this.getVariant()) {
+            case 1 -> "rusty";
+            case 2 -> "jackal";
+            case 3 -> "white";
+            default -> "orange";
+        };
     }
 
     public int getMaxHeadXRot() {
@@ -506,7 +508,7 @@ public class CoyoteEntity extends GeoTamableEntity implements NeutralMob {
 
     static {
         DATA_REMAINING_ANGER_TIME = SynchedEntityData.defineId(CoyoteEntity.class, EntityDataSerializers.INT);
-        IS_VARIANT = SynchedEntityData.defineId(CoyoteEntity.class, EntityDataSerializers.BOOLEAN);
+        VARIANT = SynchedEntityData.defineId(CoyoteEntity.class, EntityDataSerializers.INT);
         SCRATCHING_TIME = SynchedEntityData.defineId(CoyoteEntity.class, EntityDataSerializers.INT);
         SCRATCHING = SynchedEntityData.defineId(CoyoteEntity.class, EntityDataSerializers.BOOLEAN);
     }

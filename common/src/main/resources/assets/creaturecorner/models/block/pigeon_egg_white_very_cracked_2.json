@@ -1,0 +1,6 @@
+{
+	"parent": "creaturecorner:block/pigeon_egg_2",
+	"textures": {
+		"texture": "creaturecorner:block/pigeon_egg_white_very_cracked"
+	}
+}

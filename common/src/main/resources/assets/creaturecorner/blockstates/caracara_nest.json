@@ -1,0 +1,90 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "creaturecorner:block/caracara_nest"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/caracara_egg_not_cracked_1"
+      },
+      "when": {
+        "hatch": "0",
+        "caracara_eggs": "1|2|3"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/caracara_egg_not_cracked_2"
+      },
+      "when": {
+        "hatch": "0",
+        "caracara_eggs": "2|3"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/caracara_egg_not_cracked_3"
+      },
+      "when": {
+        "hatch": "0",
+        "caracara_eggs": "3"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/caracara_egg_slightly_cracked_1"
+      },
+      "when": {
+        "hatch": "1",
+        "caracara_eggs": "1|2|3"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/caracara_egg_slightly_cracked_2"
+      },
+      "when": {
+        "hatch": "1",
+        "caracara_eggs": "2|3"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/caracara_egg_slightly_cracked_3"
+      },
+      "when": {
+        "hatch": "1",
+        "caracara_eggs": "3"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/caracara_egg_very_cracked_1"
+      },
+      "when": {
+        "hatch": "2",
+        "caracara_eggs": "1|2|3"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/caracara_egg_very_cracked_2"
+      },
+      "when": {
+        "hatch": "2",
+        "caracara_eggs": "2|3"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/caracara_egg_very_cracked_3"
+      },
+      "when": {
+        "hatch": "2",
+        "caracara_eggs": "3"
+      }
+    }
+  ]
+}

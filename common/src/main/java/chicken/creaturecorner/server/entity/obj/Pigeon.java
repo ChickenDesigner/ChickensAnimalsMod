@@ -7,6 +7,8 @@ import chicken.creaturecorner.server.blockentity.CCBlockEntities;
 import chicken.creaturecorner.server.blockentity.custom.PigeonLoftBlockEntity;
 import chicken.creaturecorner.server.entity.CCEntities;
 import chicken.creaturecorner.server.entity.obj.base.AbstractCornerCreature;
+import chicken.creaturecorner.server.entity.obj.base.IEggLayer;
+import chicken.creaturecorner.server.entity.obj.base.INestEggLayer;
 import chicken.creaturecorner.server.entity.obj.goal.PigeonFlockFollowLeader;
 import chicken.creaturecorner.server.sound.CCSounds;
 import chicken.creaturecorner.util.CCTags;
@@ -66,18 +68,30 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class Pigeon extends AbstractCornerCreature {
+public class Pigeon extends AbstractCornerCreature implements INestEggLayer {
 
     public final net.minecraft.world.entity.AnimationState idleAnimationState = new net.minecraft.world.entity.AnimationState();
 
     public Pigeon leader;
     private int schoolSize = 1;
     private boolean wantsToFly;
+    @Nullable
+    BlockPos loftPos;
+    private static final int COOLDOWN_BEFORE_LOCATING_NEW_LOFT = 200;
+    int remainingCooldownBeforeLocatingNewLoft;
+    @Nullable
+    BlockPos nestPos;
+    int layEggCounter;
+
+    PigeonGoToLoftGoal goToLoftGoal;
 
     private static final EntityDataAccessor<Integer> FLY_TICKS = SynchedEntityData.defineId(Pigeon.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> VARIANT = SynchedEntityData.defineId(Pigeon.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> PANIC = SynchedEntityData.defineId(Pigeon.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> FLYING = SynchedEntityData.defineId(Pigeon.class, EntityDataSerializers.BOOLEAN);
+
+    private static final EntityDataAccessor<Boolean> IS_PREGNANT = SynchedEntityData.defineId(Pigeon.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> IS_LAYING_EGG = SynchedEntityData.defineId(Pigeon.class, EntityDataSerializers.BOOLEAN);
 
     public Pigeon(EntityType<? extends Animal> entityType, Level level) {
         super(entityType, level);
@@ -177,6 +191,8 @@ public class Pigeon extends AbstractCornerCreature {
         builder.define(VARIANT, 0);
         builder.define(PANIC, false);
         builder.define(FLYING, false);
+        builder.define(IS_PREGNANT, false);
+        builder.define(IS_LAYING_EGG, false);
     }
 
     @Override
@@ -189,17 +205,80 @@ public class Pigeon extends AbstractCornerCreature {
         if (this.hasLoft()) {
             compound.put("loft_pos", NbtUtils.writeBlockPos(this.getLoftPos()));
         }
+//        if (this.hasNest()) {
+//            compound.put("nest_pos", NbtUtils.writeBlockPos(this.getNestPos()));
+//        }
     }
 
     @Override
     public void readAdditionalSaveData(@NotNull CompoundTag compound) {
-        this.loftPos = (BlockPos)NbtUtils.readBlockPos(compound, "loft_pos").orElse((BlockPos) null);
+        this.loftPos = NbtUtils.readBlockPos(compound, "loft_pos").orElse(null);
+//        this.nestPos = NbtUtils.readBlockPos(compound, "nest_pos").orElse(null);
         super.readAdditionalSaveData(compound);
         this.setFlyTicks(compound.getInt("FlyTicks"));
         this.setVariant(compound.getInt("Variant"));
         this.setPanic(compound.getBoolean("Panic"));
         this.setFlying(compound.getBoolean("IsFlying"));
     }
+
+    @Override
+    public boolean isPregnant() {
+        return this.entityData.get(IS_PREGNANT);
+    }
+
+    @Override
+    public void setPregnant(boolean pregnant) {
+        this.entityData.set(IS_PREGNANT, pregnant);
+    }
+
+    @Override
+    public int getLayEggCounter() {
+        return this.layEggCounter;
+    }
+
+    @Override
+    public void setLayEggCounter(int layEggCounter) {
+        this.layEggCounter = layEggCounter;
+    }
+
+    @Override
+    public boolean isLayingEgg() {
+        return this.entityData.get(IS_LAYING_EGG);
+    }
+
+    @Override
+    public void setLayingEgg(boolean pIsLayingEgg) {
+        this.layEggCounter = pIsLayingEgg ? 1 : 0;
+        this.entityData.set(IS_LAYING_EGG, pIsLayingEgg);
+    }
+
+    @Override
+    public void onEggLaid() {}
+
+    public boolean hasLoft() {
+        return this.loftPos != null;
+    }
+
+    @Nullable
+    public BlockPos getLoftPos() {
+        return this.loftPos;
+    }
+
+    public boolean hasNest() {
+        return this.nestPos != null;
+    }
+
+    @Override
+    public void setNestPos(BlockPos pPos) {
+        this.nestPos = pPos;
+    }
+
+    @Nullable
+    @Override
+    public BlockPos getNestPos() {
+        return this.nestPos;
+    }
+
 
     public int getFlyTicks() {
         return this.entityData.get(FLY_TICKS);
@@ -683,32 +762,6 @@ public class Pigeon extends AbstractCornerCreature {
         return 1f / (y < 0 ? 1 : y);
     }
 
-
-
-
-
-
-    //Loft stuff
-
-    @Nullable
-    BlockPos loftPos;
-    private static final int COOLDOWN_BEFORE_LOCATING_NEW_LOFT = 200;
-    int remainingCooldownBeforeLocatingNewLoft;
-
-    PigeonGoToLoftGoal goToLoftGoal;
-
-    @VisibleForDebug
-    public boolean hasLoft() {
-        return this.loftPos != null;
-    }
-
-    @Nullable
-    @VisibleForDebug
-    public BlockPos getLoftPos() {
-        return this.loftPos;
-    }
-
-
     void pathfindRandomlyTowards(BlockPos pos) {
         Vec3 vec3 = Vec3.atBottomCenterOf(pos);
         int i = 0;
@@ -764,15 +817,15 @@ public class Pigeon extends AbstractCornerCreature {
         return blockentity instanceof PigeonLoftBlockEntity ? ((PigeonLoftBlockEntity)blockentity).isEmpty() : false;
     }
 
-    boolean isTooFarAway(BlockPos pos) {
-        return !this.closerThan(pos, 32);
-    }
+//    boolean isTooFarAway(BlockPos pos) {
+//        return !this.closerThan(pos, 64);
+//    }
 
     boolean isLoftValid() {
         if (!this.hasLoft()) {
             return false;
-        } else if (this.isTooFarAway(this.loftPos)) {
-            return false;
+//        } else if (this.isTooFarAway(this.loftPos)) {
+//            return false;
         } else {
             BlockEntity blockentity = this.level().getBlockEntity(this.loftPos);
             return blockentity != null && blockentity.getType() == CCBlockEntities.PIGEON_LOFT.get();
@@ -888,9 +941,8 @@ public class Pigeon extends AbstractCornerCreature {
         }
 
         public boolean canUse() {
-            return Pigeon.this.loftPos != null && !Pigeon.this.hasRestriction() 
-                    && Pigeon.this.wantsToEnterLoft() && !this.hasReachedTarget(Pigeon.this.loftPos)
-                    && Pigeon.this.level().getBlockState(Pigeon.this.loftPos).is(CCTags.Blocks.PIGEON_LOFTS);
+            return Pigeon.this.loftPos != null
+                    && Pigeon.this.wantsToEnterLoft() && !this.hasReachedTarget(Pigeon.this.loftPos);
         }
 
         public void start() {
@@ -913,11 +965,11 @@ public class Pigeon extends AbstractCornerCreature {
                     this.dropAndBlacklistLoft();
                 } else if (!Pigeon.this.navigation.isInProgress()) {
                     if (!Pigeon.this.closerThan(Pigeon.this.loftPos, 16)) {
-                        if (Pigeon.this.isTooFarAway(Pigeon.this.loftPos)) {
-                            this.dropLoft();
-                        } else {
-                            Pigeon.this.pathfindRandomlyTowards(Pigeon.this.loftPos);
-                        }
+//                        if (Pigeon.this.isTooFarAway(Pigeon.this.loftPos)) {
+//                            this.dropLoft();
+//                        } else {
+                            this.pathfindDirectlyTowards(Pigeon.this.loftPos);
+//                        }
                     } else {
                         boolean flag = this.pathfindDirectlyTowards(Pigeon.this.loftPos);
                         if (!flag) {
@@ -939,7 +991,7 @@ public class Pigeon extends AbstractCornerCreature {
 
         private boolean pathfindDirectlyTowards(BlockPos pos) {
             Pigeon.this.navigation.setMaxVisitedNodesMultiplier(10.0F);
-            Pigeon.this.navigation.moveTo((double)pos.getX(), (double)pos.getY(), (double)pos.getZ(), 2, (double)1.0F);
+            Pigeon.this.navigation.moveTo((double)pos.getX(), (double)pos.getY(), (double)pos.getZ(), 1, (double)1.0F);
             return Pigeon.this.navigation.getPath() != null && Pigeon.this.navigation.getPath().canReach();
         }
 

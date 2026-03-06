@@ -21,18 +21,23 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
+import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 
 public class FabricAnimalModClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         EntityRendererRegistry.register(CCEntities.PIGEON.get(), PigeonRenderer::new);
-//        EntityRendererRegistry.register(CCEntities.NEW_PIGEON.get(), NewPigeonRenderer::new);
-        EntityRendererRegistry.register(CCEntities.COYOTE_TYPE.get(), CoyoteRenderer::new);
-        EntityRendererRegistry.register(CCEntities.CARACARA_TYPE.get(), CaracaraRenderer::new);
+        EntityRendererRegistry.register(CCEntities.COYOTE.get(), CoyoteRenderer::new);
+        EntityRendererRegistry.register(CCEntities.CARACARA.get(), CaracaraRenderer::new);
         EntityRendererRegistry.register(CCEntities.ENDOVE.get(), EndoveRenderer::new);
+        EntityRendererRegistry.register(CCEntities.GALLIAN.get(), GallianRenderer::new);
+
+        EntityRendererRegistry.register(CCEntities.CARACARA_EGG.get(), ThrownItemRenderer::new);
+        EntityRendererRegistry.register(CCEntities.ENDOVE_EGG.get(), ThrownItemRenderer::new);
+        EntityRendererRegistry.register(CCEntities.PIGEON_EGG.get(), ThrownItemRenderer::new);
+
         BlockEntityRenderers.register(CCBlockEntities.PIGEON_LOFT.get(), PigeonLoftRenderer::new);
 
-        EntityRendererRegistry.register(CCEntities.GALLIAN.get(), GallianRenderer::new);
 
         EntityModelLayerRegistry.registerModelLayer(CCModelLayers.GALLIAN, GallianModel::createBodyLayer);
         EntityModelLayerRegistry.registerModelLayer(CCModelLayers.GALLIAN_CHICK, GallianChickModel::createBodyLayer);

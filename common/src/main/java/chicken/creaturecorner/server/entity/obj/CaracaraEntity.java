@@ -23,6 +23,9 @@ import net.minecraft.util.TimeUtil;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageSources;
+import net.minecraft.world.damagesource.DamageType;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -350,7 +353,7 @@ public class CaracaraEntity extends AbstractCornerCreature implements NeutralMob
     }
 
     public AgeableMob getBreedOffspring(@NotNull ServerLevel serverLevel, @NotNull AgeableMob ageableMob) {
-        CaracaraEntity entity = (CaracaraEntity) CCEntities.CARACARA_TYPE.get().create(serverLevel);
+        CaracaraEntity entity = (CaracaraEntity) CCEntities.CARACARA.get().create(serverLevel);
         if (entity != null) {
             entity.setBaby(true);
         }
@@ -791,5 +794,10 @@ public class CaracaraEntity extends AbstractCornerCreature implements NeutralMob
     @Override
     protected SoundEvent getDeathSound() {
         return CCSounds.CARACARA_DEATH.get();
+    }
+
+    @Override
+    public boolean isInvulnerableTo(DamageSource source) {
+        return source.is(DamageTypes.CACTUS) || super.isInvulnerableTo(source);
     }
 }

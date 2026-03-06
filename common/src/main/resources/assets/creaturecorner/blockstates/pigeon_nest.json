@@ -1,0 +1,238 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_nest"
+      }
+    },
+
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_egg_white_not_cracked_1"
+      },
+      "when": {
+        "hatch": "0",
+        "egg_1": "white"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_egg_white_slightly_cracked_1"
+      },
+      "when": {
+        "hatch": "1",
+        "egg_1": "white"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_egg_white_very_cracked_1"
+      },
+      "when": {
+        "hatch": "2",
+        "egg_1": "white"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_egg_white_not_cracked_2"
+      },
+      "when": {
+        "hatch": "0",
+        "egg_2": "white"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_egg_white_slightly_cracked_2"
+      },
+      "when": {
+        "hatch": "1",
+        "egg_2": "white"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_egg_white_very_cracked_2"
+      },
+      "when": {
+        "hatch": "2",
+        "egg_2": "white"
+      }
+    },
+
+
+
+
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_egg_grey_not_cracked_1"
+      },
+      "when": {
+        "hatch": "0",
+        "egg_1": "grey"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_egg_grey_slightly_cracked_1"
+      },
+      "when": {
+        "hatch": "1",
+        "egg_1": "grey"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_egg_grey_very_cracked_1"
+      },
+      "when": {
+        "hatch": "2",
+        "egg_1": "grey"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_egg_grey_not_cracked_2"
+      },
+      "when": {
+        "hatch": "0",
+        "egg_2": "grey"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_egg_grey_slightly_cracked_2"
+      },
+      "when": {
+        "hatch": "1",
+        "egg_2": "grey"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_egg_grey_very_cracked_2"
+      },
+      "when": {
+        "hatch": "2",
+        "egg_2": "grey"
+      }
+    },
+
+
+
+
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_egg_red_not_cracked_1"
+      },
+      "when": {
+        "hatch": "0",
+        "egg_1": "red"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_egg_red_slightly_cracked_1"
+      },
+      "when": {
+        "hatch": "1",
+        "egg_1": "red"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_egg_red_very_cracked_1"
+      },
+      "when": {
+        "hatch": "2",
+        "egg_1": "red"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_egg_red_not_cracked_2"
+      },
+      "when": {
+        "hatch": "0",
+        "egg_2": "red"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_egg_red_slightly_cracked_2"
+      },
+      "when": {
+        "hatch": "1",
+        "egg_2": "red"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/pigeon_egg_red_very_cracked_2"
+      },
+      "when": {
+        "hatch": "2",
+        "egg_2": "red"
+      }
+    },
+
+
+
+
+    {
+      "apply": {
+        "model": "creaturecorner:block/endove_egg_not_cracked_1"
+      },
+      "when": {
+        "hatch": "0",
+        "egg_1": "endove"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/endove_egg_slightly_cracked_1"
+      },
+      "when": {
+        "hatch": "1",
+        "egg_1": "endove"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/endove_egg_very_cracked_1"
+      },
+      "when": {
+        "hatch": "2",
+        "egg_1": "endove"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/endove_egg_not_cracked_2"
+      },
+      "when": {
+        "hatch": "0",
+        "egg_2": "endove"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/endove_egg_slightly_cracked_2"
+      },
+      "when": {
+        "hatch": "1",
+        "egg_2": "endove"
+      }
+    },
+    {
+      "apply": {
+        "model": "creaturecorner:block/endove_egg_very_cracked_2"
+      },
+      "when": {
+        "hatch": "2",
+        "egg_2": "endove"
+      }
+    }
+  ]
+}

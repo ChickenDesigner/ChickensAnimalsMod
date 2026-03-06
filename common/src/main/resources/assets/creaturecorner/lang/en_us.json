@@ -38,5 +38,16 @@
 
   "block.creaturecorner.pigeon_loft": "Pigeon Loft",
 
-  "creaturecorner.title.animal": "Creature Corner"
+  "creaturecorner.title.animal": "Creature Corner",
+
+  "block.creaturecorner.pigeon_nest": "Pigeon Nest",
+  "item.creaturecorner.pigeon_egg_white": "White Pigeon Egg",
+  "item.creaturecorner.pigeon_egg_red": "Red Pigeon Egg",
+  "item.creaturecorner.pigeon_egg_grey": "Grey Pigeon Egg",
+
+  "block.creaturecorner.endove_nest": "Endove Nest",
+  "item.creaturecorner.endove_egg": "Endove Egg",
+
+  "block.creaturecorner.caracara_nest": "Caracara Nest",
+  "item.creaturecorner.caracara_egg": "Caracara Egg"
 }

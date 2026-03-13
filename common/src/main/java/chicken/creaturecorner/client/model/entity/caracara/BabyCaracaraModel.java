@@ -3,17 +3,15 @@ package chicken.creaturecorner.client.model.entity.caracara;// Made with Blockbe
 // Paste this class into your mod and generate all required imports
 
 import chicken.creaturecorner.client.animation.BabyCaracaraAnims;
-import chicken.creaturecorner.client.animation.CaracaraAnims;
-import chicken.creaturecorner.server.entity.obj.CaracaraEntity;
+import chicken.creaturecorner.server.entity.obj.Caracara;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.model.HierarchicalModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
-import net.minecraft.util.Mth;
 
-public class BabyCaracaraModel<T extends CaracaraEntity> extends HierarchicalModel<T> {
+public class BabyCaracaraModel<T extends Caracara> extends HierarchicalModel<T> {
 
 	private final ModelPart root;
 	private final ModelPart caracara;

@@ -87,7 +87,7 @@ public class BabyPigeonModel<T extends Pigeon> extends HierarchicalModel<T> {
 		this.head_look.yRot = netHeadYaw * ((float) Math.PI / 180F);
 
 		if (entity.isSprinting()) {
-			this.animateWalk(PigeonAnims.BABY_RUN, limbSwing, limbSwingAmount, 2.5f, 1f);
+			this.animateWalk(PigeonAnims.BABY_RUN, limbSwing/2, limbSwingAmount, 2.5f, 1f);
 		} else {
 			this.animateWalk(PigeonAnims.BABY_WALK, limbSwing, limbSwingAmount, 2.5f, 2f);
 		}

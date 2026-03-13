@@ -17,7 +17,7 @@
   "creaturecorner.sound.subtitle.pigeon_idle" : "Pigeon Coos",
   "creaturecorner.sound.subtitle.pigeon_hurt" : "Pigeon Hurts",
   "creaturecorner.sound.subtitle.pigeon_death" : "Pigeon Dies",
-  "creaturecorner.sound.subtitle.pigeon_flap" : "Pigeon's Wings Whistle",
+  "creaturecorner.sound.subtitle.pigeon_flaps" : "Pigeon's Wings Whistle",
 
   "creaturecorner.sound.subtitle.endove_idle" : "Endove Coos",
   "creaturecorner.sound.subtitle.endove_hurt" : "Endove Hurts",
@@ -35,6 +35,7 @@
   "creaturecorner.sound.subtitle.gallian_egg_hatch" : "Gallian Egg Hatches",
 
   "block.creaturecorner.gallian_egg": "Gallian Egg",
+  "item.creaturecorner.gallian_spawn_egg": "Coyote Spawn Egg",
 
   "block.creaturecorner.pigeon_loft": "Pigeon Loft",
 

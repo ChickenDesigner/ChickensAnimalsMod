@@ -1,7 +1,7 @@
 package chicken.creaturecorner.server.entity.obj.eggs;
 
 import chicken.creaturecorner.server.entity.CCEntities;
-import chicken.creaturecorner.server.entity.obj.CaracaraEntity;
+import chicken.creaturecorner.server.entity.obj.Caracara;
 import chicken.creaturecorner.server.item.CCItems;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -24,7 +24,7 @@ public class CaracaraEggEntity extends BaseThrownEggEntity{
 
     @Override
     public boolean onHatch() {
-        CaracaraEntity bird = CCEntities.CARACARA.get().create(this.level());
+        Caracara bird = CCEntities.CARACARA.get().create(this.level());
         if (bird != null) {
             bird.setAge(-24000);
             bird.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), 0.0F);

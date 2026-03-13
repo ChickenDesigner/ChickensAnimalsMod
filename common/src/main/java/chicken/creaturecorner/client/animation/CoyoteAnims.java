@@ -394,7 +394,7 @@ public class CoyoteAnims {
 			))
 			.build();
 
-	public static final AnimationDefinition HOWL = AnimationDefinition.Builder.withLength(3.1667F).looping()
+	public static final AnimationDefinition HOWL = AnimationDefinition.Builder.withLength(3.1667F)
 			.addAnimation("leg1", new AnimationChannel(AnimationChannel.Targets.POSITION,
 					new Keyframe(0.0F, KeyframeAnimations.posVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.CATMULLROM),
 					new Keyframe(0.1667F, KeyframeAnimations.posVec(0.0F, 1.0F, 0.0F), AnimationChannel.Interpolations.CATMULLROM),
@@ -487,7 +487,7 @@ public class CoyoteAnims {
 			))
 			.build();
 
-	public static final AnimationDefinition EAR_SCRATCH = AnimationDefinition.Builder.withLength(2.5417F).looping()
+	public static final AnimationDefinition EAR_SCRATCH = AnimationDefinition.Builder.withLength(2.5417F)
 			.addAnimation("leg4", new AnimationChannel(AnimationChannel.Targets.ROTATION,
 					new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
 					new Keyframe(0.375F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
@@ -1043,7 +1043,7 @@ public class CoyoteAnims {
 			))
 			.build();
 
-	public static final AnimationDefinition BABY_EAR_SCRATCH = AnimationDefinition.Builder.withLength(2.5417F).looping()
+	public static final AnimationDefinition BABY_EAR_SCRATCH = AnimationDefinition.Builder.withLength(2.5417F)
 			.addAnimation("leg_base1", new AnimationChannel(AnimationChannel.Targets.ROTATION,
 					new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.CATMULLROM),
 					new Keyframe(0.125F, KeyframeAnimations.degreeVec(1.5F, 0.0F, 0.0F), AnimationChannel.Interpolations.CATMULLROM),

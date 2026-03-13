@@ -15,7 +15,7 @@ public class FabricAnimalMod implements ModInitializer {
         FabricDefaultAttributeRegistry.register(CCEntities.PIGEON.get(), Pigeon.createAttributes().build());
 //        FabricDefaultAttributeRegistry.register(CCEntities.NEW_PIGEON.get(), NewPigeonEntity.createAttributes().build());
         FabricDefaultAttributeRegistry.register(CCEntities.ENDOVE.get(), Endove.createAttributes().build());
-        FabricDefaultAttributeRegistry.register(CCEntities.CARACARA.get(), CaracaraEntity.createAttributes().build());
+        FabricDefaultAttributeRegistry.register(CCEntities.CARACARA.get(), Caracara.createAttributes().build());
         FabricDefaultAttributeRegistry.register(CCEntities.COYOTE.get(), CoyoteEntity.createAttributes().build());
 
         FabricDefaultAttributeRegistry.register(CCEntities.GALLIAN.get(), GallianEntity.createAttributes().build());

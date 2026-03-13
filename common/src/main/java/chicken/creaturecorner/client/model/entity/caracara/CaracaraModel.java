@@ -2,10 +2,8 @@ package chicken.creaturecorner.client.model.entity.caracara;// Made with Blockbe
 // Exported for Minecraft version 1.17 or later with Mojang mappings
 // Paste this class into your mod and generate all required imports
 
-import chicken.creaturecorner.client.animation.BabyCaracaraAnims;
 import chicken.creaturecorner.client.animation.CaracaraAnims;
-import chicken.creaturecorner.client.animation.CoyoteAnims;
-import chicken.creaturecorner.server.entity.obj.CaracaraEntity;
+import chicken.creaturecorner.server.entity.obj.Caracara;
 import net.minecraft.client.model.HierarchicalModel;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -14,7 +12,7 @@ import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.util.Mth;
 
-public class CaracaraModel<T extends CaracaraEntity> extends HierarchicalModel<T> {
+public class CaracaraModel<T extends Caracara> extends HierarchicalModel<T> {
 
 	private final ModelPart root;
 	private final ModelPart caracara;
@@ -113,9 +111,8 @@ public class CaracaraModel<T extends CaracaraEntity> extends HierarchicalModel<T
 	}
 
 	@Override
-	public void setupAnim(CaracaraEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+	public void setupAnim(Caracara entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
 		this.root().getAllParts().forEach(ModelPart::resetPose);
-
 
 		if (!entity.isInWaterOrBubble() && !entity.onGround()){
 			if (entity.isDiving())

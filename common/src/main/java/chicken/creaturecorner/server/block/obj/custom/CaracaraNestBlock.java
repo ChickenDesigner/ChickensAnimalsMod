@@ -2,7 +2,7 @@ package chicken.creaturecorner.server.block.obj.custom;
 
 import chicken.creaturecorner.server.block.obj.custom.base.INestBlock;
 import chicken.creaturecorner.server.entity.CCEntities;
-import chicken.creaturecorner.server.entity.obj.CaracaraEntity;
+import chicken.creaturecorner.server.entity.obj.Caracara;
 import chicken.creaturecorner.server.item.CCItems;
 import chicken.creaturecorner.server.sound.CCSounds;
 import net.minecraft.core.BlockPos;
@@ -14,8 +14,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -64,7 +62,7 @@ public class CaracaraNestBlock extends Block implements INestBlock {
                 level.levelEvent(2001, pos, Block.getId(state));
 
                 for (int j = this.getEggs(state); j > 0; j--){
-                    CaracaraEntity caracara = CCEntities.CARACARA.get().create(level);
+                    Caracara caracara = CCEntities.CARACARA.get().create(level);
                     if (caracara != null) {
                         Vec3 vec3 = pos.getCenter();
                         caracara.setBaby(true);

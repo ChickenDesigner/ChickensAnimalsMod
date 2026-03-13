@@ -3,7 +3,7 @@ package chicken.creaturecorner.fabric.server.entity;
 import chicken.creaturecorner.CCConstants;
 import chicken.creaturecorner.server.entity.CCEntities;
 import chicken.creaturecorner.server.entity.PigeonSpawner;
-import chicken.creaturecorner.server.entity.obj.CaracaraEntity;
+import chicken.creaturecorner.server.entity.obj.Caracara;
 import chicken.creaturecorner.server.entity.obj.CoyoteEntity;
 import chicken.creaturecorner.server.entity.obj.Endove;
 import chicken.creaturecorner.server.entity.obj.Pigeon;
@@ -29,7 +29,7 @@ public class CCEntitySpawns {
     public static void init() {
         SpawnPlacements.register(CCEntities.PIGEON.get(), SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Pigeon::checkAnimalSpawnRules);
         SpawnPlacements.register(CCEntities.ENDOVE.get(), SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Endove::canEndoveSpawn);
-        SpawnPlacements.register(CCEntities.CARACARA.get(), SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, CaracaraEntity::checkAnimalSpawnRules);
+        SpawnPlacements.register(CCEntities.CARACARA.get(), SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Caracara::checkAnimalSpawnRules);
         SpawnPlacements.register(CCEntities.COYOTE.get(), SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, CoyoteEntity::checkCoyoteSpawnRules);
 
         BiomeModifications.addSpawn(

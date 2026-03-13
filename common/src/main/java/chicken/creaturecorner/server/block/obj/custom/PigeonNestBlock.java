@@ -3,16 +3,13 @@ package chicken.creaturecorner.server.block.obj.custom;
 import chicken.creaturecorner.server.block.CCBlocks;
 import chicken.creaturecorner.server.block.obj.custom.base.INestBlock;
 import chicken.creaturecorner.server.entity.CCEntities;
-import chicken.creaturecorner.server.entity.obj.CaracaraEntity;
 import chicken.creaturecorner.server.entity.obj.Endove;
-import chicken.creaturecorner.server.entity.obj.NewPigeonEntity;
 import chicken.creaturecorner.server.entity.obj.Pigeon;
 import chicken.creaturecorner.server.item.CCItems;
 import chicken.creaturecorner.server.sound.CCSounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.ByIdMap;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
@@ -31,7 +28,6 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -39,7 +35,6 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 import javax.annotation.Nullable;
-import java.util.function.IntFunction;
 
 public class PigeonNestBlock extends Block implements INestBlock {
 
@@ -58,7 +53,7 @@ public class PigeonNestBlock extends Block implements INestBlock {
 
     @Override
     protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        return Block.box(0, 0, 0, 16, 8, 16);
+        return Block.box(1, 0, 1, 15, 5, 15);
     }
 
     protected void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
@@ -183,36 +178,81 @@ public class PigeonNestBlock extends Block implements INestBlock {
 
             return ItemInteractionResult.SUCCESS;
 
-        } else if (stack.is(CCItems.CARACARA_EGG.get()) && state.getValue(EGG_1) == EggType.EMPTY || state.getValue(EGG_2) == EggType.EMPTY) {
-
+        } else if ((state.getValue(EGG_1) == EggType.EMPTY || state.getValue(EGG_2) == EggType.EMPTY)) {
 
             if (state.getValue(EGG_1) == EggType.EMPTY){
-                if (stack.is(CCItems.PIGEON_EGG_RED.get()))
+                if (stack.is(CCItems.PIGEON_EGG_RED.get())){
                     level.setBlock(pos, state.setValue(EGG_1, EggType.RED),  2);
-                else if (stack.is(CCItems.PIGEON_EGG_WHITE.get()))
+
+                    if (!player.getAbilities().instabuild)
+                        stack.shrink(1);
+
+                    return ItemInteractionResult.SUCCESS;
+                }
+                else if (stack.is(CCItems.PIGEON_EGG_WHITE.get())){
                     level.setBlock(pos, state.setValue(EGG_1, EggType.WHITE),  2);
-                else if (stack.is(CCItems.PIGEON_EGG_GREY.get()))
+
+                    if (!player.getAbilities().instabuild)
+                        stack.shrink(1);
+
+                    return ItemInteractionResult.SUCCESS;
+                }
+                else if (stack.is(CCItems.PIGEON_EGG_GREY.get())){
+
                     level.setBlock(pos, state.setValue(EGG_1, EggType.GREY),  2);
-                else if (stack.is(CCItems.ENDOVE_EGG.get()))
+
+                    if (!player.getAbilities().instabuild)
+                        stack.shrink(1);
+
+                    return ItemInteractionResult.SUCCESS;
+                }
+                else if (stack.is(CCItems.ENDOVE_EGG.get())){
+
                     level.setBlock(pos, state.setValue(EGG_1, EggType.ENDOVE),  2);
+
+                    if (!player.getAbilities().instabuild)
+                        stack.shrink(1);
+
+                    return ItemInteractionResult.SUCCESS;
+                }
             } else if (state.getValue(EGG_2) == EggType.EMPTY){
-                if (stack.is(CCItems.PIGEON_EGG_RED.get()))
+                if (stack.is(CCItems.PIGEON_EGG_RED.get())){
                     level.setBlock(pos, state.setValue(EGG_2, EggType.RED),  2);
-                else if (stack.is(CCItems.PIGEON_EGG_WHITE.get()))
+
+                    if (!player.getAbilities().instabuild)
+                        stack.shrink(1);
+
+                    return ItemInteractionResult.SUCCESS;
+                }
+                else if (stack.is(CCItems.PIGEON_EGG_WHITE.get())){
                     level.setBlock(pos, state.setValue(EGG_2, EggType.WHITE),  2);
-                else if (stack.is(CCItems.PIGEON_EGG_GREY.get()))
+
+                    if (!player.getAbilities().instabuild)
+                        stack.shrink(1);
+
+                    return ItemInteractionResult.SUCCESS;
+                }
+                else if (stack.is(CCItems.PIGEON_EGG_GREY.get())){
+
                     level.setBlock(pos, state.setValue(EGG_2, EggType.GREY),  2);
-                else if (stack.is(CCItems.ENDOVE_EGG.get()))
+
+                    if (!player.getAbilities().instabuild)
+                        stack.shrink(1);
+
+                    return ItemInteractionResult.SUCCESS;
+                }
+                else if (stack.is(CCItems.ENDOVE_EGG.get())){
+
                     level.setBlock(pos, state.setValue(EGG_2, EggType.ENDOVE),  2);
+
+                    if (!player.getAbilities().instabuild)
+                        stack.shrink(1);
+
+                    return ItemInteractionResult.SUCCESS;
+                }
             }
-
-            if (!player.getAbilities().instabuild)
-                stack.shrink(1);
-
-            return ItemInteractionResult.SUCCESS;
-        }else {
-            return super.useItemOn(stack, state, level, pos, player, hand, hitResult);
         }
+        return super.useItemOn(stack, state, level, pos, player, hand, hitResult);
     }
 
     public int getHatchLevel(BlockState state) {
@@ -227,6 +267,18 @@ public class PigeonNestBlock extends Block implements INestBlock {
         return state.getValue(EGG_1);
     }
 
+    public void setEgg1(EggType type, BlockState state, Level level, BlockPos pos) {
+        level.setBlock(pos, state.setValue(EGG_1, type),  2);
+    }
+
+    public void setEgg2(EggType type, BlockState state, Level level, BlockPos pos) {
+        level.setBlock(pos, state.setValue(EGG_2, type),  2);
+    }
+
+    public void setEggs(EggType egg1, EggType egg2, BlockState state, Level level, BlockPos pos) {
+        level.setBlock(pos, state.setValue(EGG_1, egg1).setValue(EGG_2, egg2),  2);
+    }
+
     @Override
     public boolean isEmpty(BlockState state) {
         return this.getEgg1(state) == EggType.EMPTY && this.getEgg2(state) == EggType.EMPTY;
@@ -236,11 +288,14 @@ public class PigeonNestBlock extends Block implements INestBlock {
         EMPTY("empty", Items.AIR),
         WHITE("white", CCItems.PIGEON_EGG_WHITE.get()),
         RED("red", CCItems.PIGEON_EGG_RED.get()),
-        GREY("grey", CCItems.PIGEON_EGG_RED.get()),
+        GREY("grey", CCItems.PIGEON_EGG_GREY.get()),
         ENDOVE("endove", CCItems.ENDOVE_EGG.get());
 
         private final String name;
         private final Item eggType;
+
+        public static final StringRepresentable.EnumCodec<EggType> CODEC
+                = StringRepresentable.fromEnum(EggType::values);
 
         private EggType(String name, Item eggType) {
             this.name = name;
@@ -254,5 +309,10 @@ public class PigeonNestBlock extends Block implements INestBlock {
         public Item getEggItem() {
             return this.eggType;
         }
+
+        public static EggType byName(String pName) {
+            return CODEC.byName(pName, EMPTY);
+        }
+
     }
 }

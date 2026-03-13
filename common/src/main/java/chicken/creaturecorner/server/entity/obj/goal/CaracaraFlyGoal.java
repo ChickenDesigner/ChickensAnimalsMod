@@ -1,14 +1,14 @@
 package chicken.creaturecorner.server.entity.obj.goal;
 
-import chicken.creaturecorner.server.entity.obj.CaracaraEntity;
+import chicken.creaturecorner.server.entity.obj.Caracara;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomFlyingGoal;
 import net.minecraft.world.entity.ai.util.AirAndWaterRandomPos;
 import net.minecraft.world.entity.ai.util.HoverRandomPos;
 import net.minecraft.world.phys.Vec3;
 
 public class CaracaraFlyGoal extends WaterAvoidingRandomFlyingGoal {
-    private final CaracaraEntity pigeonEntity;
-    public CaracaraFlyGoal(CaracaraEntity pMob, double pSpeedModifier) {
+    private final Caracara pigeonEntity;
+    public CaracaraFlyGoal(Caracara pMob, double pSpeedModifier) {
         super(pMob, pSpeedModifier);
         this.pigeonEntity = pMob;
         this.interval = 55;

@@ -3,16 +3,18 @@ package chicken.creaturecorner.server.entity.obj;
 
 import chicken.creaturecorner.server.block.CCBlocks;
 import chicken.creaturecorner.server.block.obj.custom.PigeonLoftBlock;
+import chicken.creaturecorner.server.block.obj.custom.PigeonNestBlock;
 import chicken.creaturecorner.server.blockentity.CCBlockEntities;
 import chicken.creaturecorner.server.blockentity.custom.PigeonLoftBlockEntity;
 import chicken.creaturecorner.server.entity.CCEntities;
 import chicken.creaturecorner.server.entity.obj.base.AbstractCornerCreature;
-import chicken.creaturecorner.server.entity.obj.base.IEggLayer;
 import chicken.creaturecorner.server.entity.obj.base.INestEggLayer;
 import chicken.creaturecorner.server.entity.obj.goal.PigeonFlockFollowLeader;
+import chicken.creaturecorner.server.entity.obj.goal.nesting.BuildNestGoal;
+import chicken.creaturecorner.server.entity.obj.goal.nesting.EggLayerBreedGoal;
+import chicken.creaturecorner.server.entity.obj.goal.nesting.GoToNestGoal;
+import chicken.creaturecorner.server.entity.obj.goal.nesting.LocateNestGoal;
 import chicken.creaturecorner.server.sound.CCSounds;
-import chicken.creaturecorner.util.CCTags;
-import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -24,11 +26,12 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.RandomSource;
-import net.minecraft.util.VisibleForDebug;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
@@ -43,8 +46,6 @@ import net.minecraft.world.entity.ai.util.AirAndWaterRandomPos;
 import net.minecraft.world.entity.ai.util.AirRandomPos;
 import net.minecraft.world.entity.ai.util.HoverRandomPos;
 import net.minecraft.world.entity.ai.util.LandRandomPos;
-import net.minecraft.world.entity.ai.village.poi.PoiManager;
-import net.minecraft.world.entity.ai.village.poi.PoiRecord;
 import net.minecraft.world.entity.animal.*;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -53,9 +54,11 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureType;
 import net.minecraft.world.level.pathfinder.Path;
@@ -65,8 +68,10 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static chicken.creaturecorner.server.block.obj.custom.PigeonNestBlock.EGG_1;
+import static chicken.creaturecorner.server.block.obj.custom.PigeonNestBlock.EGG_2;
 
 public class Pigeon extends AbstractCornerCreature implements INestEggLayer {
 
@@ -82,16 +87,23 @@ public class Pigeon extends AbstractCornerCreature implements INestEggLayer {
     @Nullable
     BlockPos nestPos;
     int layEggCounter;
+    int buildNestCounter;
+    int locateNestCooldown;
 
     PigeonGoToLoftGoal goToLoftGoal;
 
     private static final EntityDataAccessor<Integer> FLY_TICKS = SynchedEntityData.defineId(Pigeon.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> VARIANT = SynchedEntityData.defineId(Pigeon.class, EntityDataSerializers.INT);
+
     private static final EntityDataAccessor<Boolean> PANIC = SynchedEntityData.defineId(Pigeon.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> FLYING = SynchedEntityData.defineId(Pigeon.class, EntityDataSerializers.BOOLEAN);
 
+    private static final EntityDataAccessor<Integer> PARTNER_VARIANT = SynchedEntityData.defineId(Pigeon.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> IS_PREGNANT = SynchedEntityData.defineId(Pigeon.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> IS_BUILDING_NEST = SynchedEntityData.defineId(Pigeon.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> IS_LAYING_EGG = SynchedEntityData.defineId(Pigeon.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Integer> NEST_SEARCH_TIME = SynchedEntityData.defineId(Pigeon.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> NEST_BUILD_TIME = SynchedEntityData.defineId(Pigeon.class, EntityDataSerializers.INT);
 
     public Pigeon(EntityType<? extends Animal> entityType, Level level) {
         super(entityType, level);
@@ -136,42 +148,13 @@ public class Pigeon extends AbstractCornerCreature implements INestEggLayer {
                         entity instanceof Wolf || entity instanceof Ocelot || entity instanceof Cat || entity instanceof CoyoteEntity
         ));
 
-        this.goalSelector.addGoal(2, new BreedGoal(this, 1, Pigeon.class));
+        this.goalSelector.addGoal(2, new EggLayerBreedGoal(this, 1));
+        this.goalSelector.addGoal(0, new PigeonLocateNest());
+        this.goalSelector.addGoal(2, new PigeonGoToNestGoal(this, 1));
+        this.goalSelector.addGoal(1, new PigeonBuildNestGoal());
+
+
         this.goalSelector.addGoal(8, new PigeonFlyGoal());
-    }
-
-    class PigeonWaterAvoidingRandomStrollGoal extends RandomStrollGoal{
-
-        public static final float PROBABILITY = 0.001F;
-        protected final float probability;
-
-        public PigeonWaterAvoidingRandomStrollGoal(PathfinderMob mob, double speedModifier) {
-            this(mob, speedModifier, 0.001F);
-        }
-
-        public PigeonWaterAvoidingRandomStrollGoal(PathfinderMob mob, double speedModifier, float probability) {
-            super(mob, speedModifier, 120, false);
-            this.probability = probability;
-        }
-
-
-        protected Vec3 getPosition() {
-            if (this.mob.isInWaterOrBubble()) {
-                Vec3 vec3 = LandRandomPos.getPos(this.mob, 15, 7);
-                return vec3 == null ? super.getPosition() : vec3;
-            } else {
-                return this.mob.getRandom().nextFloat() >= this.probability ? LandRandomPos.getPos(this.mob, 10, 7) : super.getPosition();
-            }
-        }
-
-        public boolean canUse() {
-            return (!Pigeon.this.isFlying() || !Pigeon.this.wantsToFly) && super.canUse();
-        }
-
-        public boolean canContinueToUse() {
-            return (!Pigeon.this.isFlying() || !Pigeon.this.wantsToFly) && super.canContinueToUse();
-        }
-
     }
 
     private void switchNavigator(boolean onLand) {
@@ -191,8 +174,12 @@ public class Pigeon extends AbstractCornerCreature implements INestEggLayer {
         builder.define(VARIANT, 0);
         builder.define(PANIC, false);
         builder.define(FLYING, false);
+        builder.define(PARTNER_VARIANT, 0);
         builder.define(IS_PREGNANT, false);
         builder.define(IS_LAYING_EGG, false);
+        builder.define(IS_BUILDING_NEST, false);
+        builder.define(NEST_SEARCH_TIME, 0);
+        builder.define(NEST_BUILD_TIME, 0);
     }
 
     @Override
@@ -205,20 +192,45 @@ public class Pigeon extends AbstractCornerCreature implements INestEggLayer {
         if (this.hasLoft()) {
             compound.put("loft_pos", NbtUtils.writeBlockPos(this.getLoftPos()));
         }
-//        if (this.hasNest()) {
-//            compound.put("nest_pos", NbtUtils.writeBlockPos(this.getNestPos()));
-//        }
+        if (this.hasNest()) {
+            compound.put("nest_pos", NbtUtils.writeBlockPos(this.getNestPos()));
+        }
+
+        compound.putInt("PartnerVariant", getPartnerVariant());
+        compound.putBoolean("IsPregnant", isPregnant());
+        compound.putBoolean("IsLayingEgg", isLayingEgg());
+        compound.putBoolean("IsBuildingNest", isBuildingNest());
+        compound.putInt("NestSearchTime", getNestSearchTime());
+        compound.putInt("NestBuildTime", getNestBuildingTime());
     }
 
     @Override
     public void readAdditionalSaveData(@NotNull CompoundTag compound) {
-        this.loftPos = NbtUtils.readBlockPos(compound, "loft_pos").orElse(null);
-//        this.nestPos = NbtUtils.readBlockPos(compound, "nest_pos").orElse(null);
+        if (compound.contains("loft_pos"))
+            this.loftPos = NbtUtils.readBlockPos(compound, "loft_pos").orElse(null);
+        if (compound.contains("nest_pos"))
+            this.nestPos = NbtUtils.readBlockPos(compound, "nest_pos").orElse(null);
         super.readAdditionalSaveData(compound);
         this.setFlyTicks(compound.getInt("FlyTicks"));
         this.setVariant(compound.getInt("Variant"));
         this.setPanic(compound.getBoolean("Panic"));
         this.setFlying(compound.getBoolean("IsFlying"));
+
+        this.setPartnerVariant(compound.getInt("PartnerVariant"));
+        this.setPregnant(compound.getBoolean("IsPregnant"));
+        this.setLayingEgg(compound.getBoolean("IsLayingEgg"));
+        this.setBuildingNest(compound.getBoolean("IsBuildingNest"));
+        this.setNestSearchTime(compound.getInt("NestSearchTime"));
+        this.setNestBuildingTime(compound.getInt("NestBuildTime"));
+    }
+
+    public boolean hasLoft() {
+        return this.loftPos != null;
+    }
+
+    @Nullable
+    public BlockPos getLoftPos() {
+        return this.loftPos;
     }
 
     @Override
@@ -252,20 +264,8 @@ public class Pigeon extends AbstractCornerCreature implements INestEggLayer {
         this.entityData.set(IS_LAYING_EGG, pIsLayingEgg);
     }
 
-    @Override
-    public void onEggLaid() {}
-
-    public boolean hasLoft() {
-        return this.loftPos != null;
-    }
-
-    @Nullable
-    public BlockPos getLoftPos() {
-        return this.loftPos;
-    }
-
     public boolean hasNest() {
-        return this.nestPos != null;
+        return this.getNestPos() != null;
     }
 
     @Override
@@ -279,6 +279,106 @@ public class Pigeon extends AbstractCornerCreature implements INestEggLayer {
         return this.nestPos;
     }
 
+    @Override
+    public int getBuildingNestCounter() {
+        return buildNestCounter;
+    }
+
+    @Override
+    public void setBuildingNestCounter(int buildNestCounter) {
+        this.buildNestCounter = buildNestCounter;
+    }
+
+    @Override
+    public int getNestSearchTime() {
+        return this.entityData.get(NEST_SEARCH_TIME);
+    }
+
+    @Override
+    public void setNestSearchTime(int searchTime) {
+        this.entityData.set(NEST_SEARCH_TIME, searchTime);
+    }
+
+    @Override
+    public int getNestBuildingTime() {
+        return this.entityData.get(NEST_BUILD_TIME);
+    }
+
+    @Override
+    public void setNestBuildingTime(int searchTime) {
+        this.entityData.set(NEST_BUILD_TIME, searchTime);
+    }
+
+    @Override
+    public Block getNestType() {
+        return CCBlocks.PIGEON_NEST.get();
+    }
+
+    @Override
+    public boolean isBuildingNest() {
+        return this.entityData.get(IS_BUILDING_NEST);
+    }
+
+    @Override
+    public void setBuildingNest(boolean buildingNest) {
+        this.buildNestCounter = buildingNest ? 1 : 0;
+        this.entityData.set(IS_BUILDING_NEST, buildingNest);
+    }
+
+    @Override
+    public int getNestSearchCooldown() {
+        return locateNestCooldown;
+    }
+
+    @Override
+    public void setNestSearchCooldown(int cooldown) {
+        this.locateNestCooldown = cooldown;
+    }
+
+    @Override
+    public void onNestBuilt(Level level, BlockPos pos) {
+        this.getJumpControl().jump();
+        BlockState state = this.getNestType().defaultBlockState();
+        level.playSound(null, pos, SoundEvents.GRASS_PLACE, SoundSource.BLOCKS, 0.3F, 0.9F + level.random.nextFloat() * 0.2F);
+        level.setBlock(pos, state, 3);
+        level.gameEvent(GameEvent.BLOCK_PLACE, pos, GameEvent.Context.of(this, state));
+        this.setNestPos(pos);
+    }
+
+    @Override
+    public void onEggLaid(Level level, BlockPos pos) {
+        if (!this.level().isClientSide()){
+            PigeonNestBlock.EggType egg1 = this.getRandom().nextBoolean() ? PigeonNestBlock.EggType.byName(getVariantName(this.getVariant())) :
+                    PigeonNestBlock.EggType.byName(getVariantName(this.getPartnerVariant()));
+            PigeonNestBlock.EggType egg2 = this.getRandom().nextBoolean() ? PigeonNestBlock.EggType.EMPTY :
+                    this.getRandom().nextBoolean() ? PigeonNestBlock.EggType.byName(getVariantName(this.getVariant())) :
+                            PigeonNestBlock.EggType.byName(getVariantName(this.getPartnerVariant()));
+
+            if (this.hasNest()){
+                BlockState blockstate = CCBlocks.PIGEON_NEST.get().defaultBlockState();
+
+                if (blockstate.getBlock() instanceof PigeonNestBlock){
+
+                    level.setBlockAndUpdate(pos, blockstate.setValue(EGG_1, egg1).setValue(EGG_2, egg2));
+
+                    level.playSound(null, pos, SoundEvents.MOSS_PLACE, SoundSource.BLOCKS, 0.3F, 0.9F + level.random.nextFloat() * 0.2F);
+                    level.playSound(null, pos, SoundEvents.TURTLE_LAY_EGG, SoundSource.BLOCKS, 0.3F, 0.9F + level.random.nextFloat() * 0.2F);
+
+                    level.gameEvent(GameEvent.BLOCK_PLACE, pos, GameEvent.Context.of(this, blockstate.setValue(EGG_1, egg1).setValue(EGG_2, egg2)));
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onBreed(AbstractCornerCreature partner) {
+        Pigeon pigeonPartner = (Pigeon) partner;
+        this.setPartnerVariant(pigeonPartner.getPartnerVariant());
+        if (!this.hasNest()){
+            this.setNestSearchTime(20*60);
+            this.setNestBuildingTime(20*60);
+        }
+    }
 
     public int getFlyTicks() {
         return this.entityData.get(FLY_TICKS);
@@ -294,6 +394,14 @@ public class Pigeon extends AbstractCornerCreature implements INestEggLayer {
 
     public void setVariant(int variant) {
         this.entityData.set(VARIANT, variant);
+    }
+
+    public int getPartnerVariant() {
+        return this.entityData.get(PARTNER_VARIANT);
+    }
+
+    public void setPartnerVariant(int variant) {
+        this.entityData.set(PARTNER_VARIANT, variant);
     }
 
     public boolean getPanic() {
@@ -332,7 +440,6 @@ public class Pigeon extends AbstractCornerCreature implements INestEggLayer {
     }
 
     public static String getVariantName(int variant) {
-
         return switch (variant) {
             case 1 -> "white";
             case 2 -> "red";
@@ -362,7 +469,7 @@ public class Pigeon extends AbstractCornerCreature implements INestEggLayer {
     }
 
     public boolean canBeFollowed() {
-        return !this.isFollower() && this.hasFollowers() && this.schoolSize < this.getMaxSchoolSize() && !this.isBaby() && this.level().isDay() && this.isFlying();
+        return !this.isFollower() && !this.isPregnant() && this.hasFollowers() && this.schoolSize < this.getMaxSchoolSize() && !this.isBaby() && this.level().isDay() && this.isFlying();
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -403,6 +510,15 @@ public class Pigeon extends AbstractCornerCreature implements INestEggLayer {
                 this.loftPos = null;
             }
         }
+
+        if (this.isAlive() && (this.isLayingEgg() && this.layEggCounter >= 1 && this.layEggCounter % 5 == 0)) {
+            BlockPos blockpos = this.blockPosition();
+            this.level().levelEvent(2001, blockpos, Block.getId(this.level().getBlockState(blockpos)));
+        }
+        if (this.isAlive() && (this.isBuildingNest() && this.buildNestCounter >= 1 && this.buildNestCounter % 5 == 0)) {
+            BlockPos blockpos = this.blockPosition().below();
+            this.level().levelEvent(2001, blockpos, Block.getId(this.level().getBlockState(blockpos)));
+        }
     }
 
     @Override
@@ -426,7 +542,7 @@ public class Pigeon extends AbstractCornerCreature implements INestEggLayer {
 
             if (!this.isTooCloseToLeader()){
                 if (this.leader.wantsToFly && this.getFlyTicks()<500){
-                    this.setFlyTicks(500);
+                    this.setFlyTicks(600);
                 }
 
                 if (!this.leader.wantsToFly && this.getFlyTicks()>0){
@@ -465,6 +581,24 @@ public class Pigeon extends AbstractCornerCreature implements INestEggLayer {
                 this.schoolSize = 1;
             }
         }
+
+        if (this.getNestSearchTime() > 0){
+            int prevSearchTime = this.getNestSearchTime();
+            this.setNestSearchTime(prevSearchTime-1);
+
+            if (!this.isPregnant() || this.hasNest()){
+                this.setNestSearchTime(0);
+            }
+        }
+
+        if (this.getNestBuildingTime() > 0 && this.getNestSearchTime() == 0){
+            int prevSearchTime = this.getNestBuildingTime();
+            this.setNestBuildingTime(prevSearchTime-1);
+
+            if (!this.isPregnant() || this.hasNest()){
+                this.setNestBuildingTime(0);
+            }
+        }
     }
 
     private void setupAnimationStates() {
@@ -500,7 +634,7 @@ public class Pigeon extends AbstractCornerCreature implements INestEggLayer {
 
     }
     public boolean isFollower() {
-        return this.leader != null && this.leader.isAlive() && this.level().isDay();
+        return this.leader != null && this.leader.isAlive() && this.level().isDay() && !this.isPregnant();
     }
 
 
@@ -876,29 +1010,21 @@ public class Pigeon extends AbstractCornerCreature implements INestEggLayer {
         }
 
         public void start() {
-            Pigeon.this.remainingCooldownBeforeLocatingNewLoft = 200;
+            Pigeon.this.remainingCooldownBeforeLocatingNewLoft = 100;
 
-            if (findNearestLoftWithSpace() != null){
-                Pigeon.this.goToLoftGoal.clearBlacklist();
-                Pigeon.this.setLoftPos(findNearestLoftWithSpace());
+            BlockPos loftPos = findNearestLoftWithSpace();
+            if (loftPos != null){
+                Pigeon.this.setLoftPos(loftPos);
             }
         }
 
-        private List<BlockPos> findNearbyLoftsWithSpace() {
-            BlockPos blockPos = Pigeon.this.blockPosition();
-            PoiManager poiManager = ((ServerLevel)Pigeon.this.level()).getPoiManager();
-            Stream<PoiRecord> stream = poiManager.getInRange((holder) -> holder.is(CCTags.POITypes.PIGEON_LOFT_POI), blockPos, 20, PoiManager.Occupancy.ANY);
-
-            return stream.map(PoiRecord::getPos).filter(Pigeon.this::doesLoftHaveSpace).sorted(Comparator.comparingDouble(
-                    (blockPos2) -> blockPos2.distSqr(blockPos))).collect(Collectors.toList());
-        }
         protected BlockPos findNearestLoftWithSpace() {
             int i = 24;
             int j = 3;
             BlockPos blockpos = Pigeon.this.blockPosition();
             BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
 
-            for (int k = -1; k <= j; k = k > 0 ? -k : 1 - k) {
+            for (int k = 0; k <= j; k = k > 0 ? -k : 1 - k) {
                 for (int l = 0; l < i; l++) {
                     for (int i1 = 0; i1 <= l; i1 = i1 > 0 ? -i1 : 1 - i1) {
                         for (int j1 = i1 < l && i1 > -l ? l : 0; j1 <= l; j1 = j1 > 0 ? -j1 : 1 - j1) {
@@ -928,7 +1054,6 @@ public class Pigeon extends AbstractCornerCreature implements INestEggLayer {
         public static final int MAX_TRAVELLING_TICKS = 600;
         int travellingTicks;
         private static final int MAX_BLACKLISTED_TARGETS = 3;
-        final List<BlockPos> blacklistedTargets;
         @Nullable
         private Path lastPath;
         private static final int TICKS_BEFORE_LOFT_DROP = 60;
@@ -936,19 +1061,22 @@ public class Pigeon extends AbstractCornerCreature implements INestEggLayer {
 
         PigeonGoToLoftGoal() {
             this.travellingTicks = Pigeon.this.level().random.nextInt(10);
-            this.blacklistedTargets = Lists.newArrayList();
             this.setFlags(EnumSet.of(Flag.MOVE));
         }
 
         public boolean canUse() {
-            return Pigeon.this.loftPos != null
-                    && Pigeon.this.wantsToEnterLoft() && !this.hasReachedTarget(Pigeon.this.loftPos);
+            return Pigeon.this.hasLoft() && Pigeon.this.wantsToEnterLoft() && !this.hasReachedTarget(Pigeon.this.loftPos);
         }
 
         public void start() {
             this.travellingTicks = 0;
             this.ticksStuck = 0;
-            super.start();
+            if (Pigeon.this.hasLoft())
+                this.moveToLoft();
+        }
+
+        public void moveToLoft(){
+            Pigeon.this.getNavigation().moveTo(Pigeon.this.getLoftPos().getX(), Pigeon.this.getLoftPos().getY(), Pigeon.this.getLoftPos().getZ(), 1);
         }
 
         public void stop() {
@@ -961,20 +1089,13 @@ public class Pigeon extends AbstractCornerCreature implements INestEggLayer {
         public void tick() {
             if (Pigeon.this.loftPos != null) {
                 ++this.travellingTicks;
-                if (this.travellingTicks > this.adjustedTickDelay(600)) {
-                    this.dropAndBlacklistLoft();
-                } else if (!Pigeon.this.navigation.isInProgress()) {
+
+                if (!Pigeon.this.navigation.isInProgress()) {
                     if (!Pigeon.this.closerThan(Pigeon.this.loftPos, 16)) {
-//                        if (Pigeon.this.isTooFarAway(Pigeon.this.loftPos)) {
-//                            this.dropLoft();
-//                        } else {
-                            this.pathfindDirectlyTowards(Pigeon.this.loftPos);
-//                        }
+                        this.pathfindDirectlyTowards(Pigeon.this.loftPos);
                     } else {
                         boolean flag = this.pathfindDirectlyTowards(Pigeon.this.loftPos);
-                        if (!flag) {
-                            this.dropAndBlacklistLoft();
-                        } else if (this.lastPath != null && Pigeon.this.navigation.getPath().sameAs(this.lastPath)) {
+                        if (flag && this.lastPath != null && Pigeon.this.navigation.getPath().sameAs(this.lastPath)) {
                             ++this.ticksStuck;
                             if (this.ticksStuck > 60) {
                                 this.dropLoft();
@@ -991,33 +1112,8 @@ public class Pigeon extends AbstractCornerCreature implements INestEggLayer {
 
         private boolean pathfindDirectlyTowards(BlockPos pos) {
             Pigeon.this.navigation.setMaxVisitedNodesMultiplier(10.0F);
-            Pigeon.this.navigation.moveTo((double)pos.getX(), (double)pos.getY(), (double)pos.getZ(), 1, (double)1.0F);
+            Pigeon.this.navigation.moveTo(pos.getX(), pos.getY(), pos.getZ(), 1.0F);
             return Pigeon.this.navigation.getPath() != null && Pigeon.this.navigation.getPath().canReach();
-        }
-
-        boolean isTargetBlacklisted(BlockPos pos) {
-            return this.blacklistedTargets.contains(pos);
-        }
-
-        private void blacklistTarget(BlockPos pos) {
-            this.blacklistedTargets.add(pos);
-
-            while(this.blacklistedTargets.size() > 3) {
-                this.blacklistedTargets.remove(0);
-            }
-
-        }
-
-        void clearBlacklist() {
-            this.blacklistedTargets.clear();
-        }
-
-        private void dropAndBlacklistLoft() {
-            if (Pigeon.this.loftPos != null) {
-                this.blacklistTarget(Pigeon.this.loftPos);
-            }
-
-            this.dropLoft();
         }
 
         private void dropLoft() {
@@ -1031,6 +1127,89 @@ public class Pigeon extends AbstractCornerCreature implements INestEggLayer {
             } else {
                 Path path = Pigeon.this.navigation.getPath();
                 return path != null && path.getTarget().equals(pos) && path.canReach() && path.isDone();
+            }
+        }
+    }
+
+    class PigeonWaterAvoidingRandomStrollGoal extends RandomStrollGoal{
+
+        public static final float PROBABILITY = 0.001F;
+        protected final float probability;
+
+        public PigeonWaterAvoidingRandomStrollGoal(PathfinderMob mob, double speedModifier) {
+            this(mob, speedModifier, 0.001F);
+        }
+
+        public PigeonWaterAvoidingRandomStrollGoal(PathfinderMob mob, double speedModifier, float probability) {
+            super(mob, speedModifier, 120, false);
+            this.probability = probability;
+        }
+
+
+        protected Vec3 getPosition() {
+            if (this.mob.isInWaterOrBubble()) {
+                Vec3 vec3 = LandRandomPos.getPos(this.mob, 15, 7);
+                return vec3 == null ? super.getPosition() : vec3;
+            } else {
+                return this.mob.getRandom().nextFloat() >= this.probability ? LandRandomPos.getPos(this.mob, 10, 7) : super.getPosition();
+            }
+        }
+
+        public boolean canUse() {
+            return (!Pigeon.this.isFlying() || !Pigeon.this.wantsToFly) && super.canUse();
+        }
+
+        public boolean canContinueToUse() {
+            return (!Pigeon.this.isFlying() || !Pigeon.this.wantsToFly) && super.canContinueToUse();
+        }
+    }
+
+    class PigeonLocateNest extends LocateNestGoal{
+
+        public PigeonLocateNest() {
+            super(Pigeon.this, 24);
+        }
+
+        @Override
+        protected boolean isValidTarget(LevelReader level, BlockPos blockPos) {
+            if (level.getBlockState(blockPos).getBlock() instanceof PigeonNestBlock pigeonNest && creature instanceof INestEggLayer nestEggLayer)
+                return pigeonNest.isEmpty(level.getBlockState(blockPos)) && level.getBlockState(blockPos).is(nestEggLayer.getNestType());
+            return false;
+        }
+    }
+
+    class PigeonBuildNestGoal extends BuildNestGoal{
+        public PigeonBuildNestGoal() {
+            super(Pigeon.this, 1, 0.9);
+        }
+
+        @Override
+        public boolean isValidTarget(LevelReader pLevel, BlockPos pPos) {
+            return ((!pLevel.canSeeSky(pPos) && Pigeon.this.getNestBuildingTime()>0) || Pigeon.this.getNestBuildingTime()==0)
+                    && super.isValidTarget(pLevel, pPos);
+        }
+    }
+
+    static class PigeonGoToNestGoal extends GoToNestGoal{
+
+        public PigeonGoToNestGoal(AbstractCornerCreature mob, double speedModifier) {
+            super(mob, speedModifier);
+        }
+
+        @Override
+        public void start() {
+            if (this.mob instanceof INestEggLayer nester && nester.hasNest()){
+                this.blockPos = nester.getNestPos();
+                if (this.mob.level().getBlockState(blockPos).getBlock() instanceof PigeonNestBlock nestBlock){
+                    if (this.mob.level().getBlockState(blockPos).is(nester.getNestType())
+                    && nestBlock.isEmpty(this.mob.level().getBlockState(blockPos))){
+                        this.moveMobToBlock();
+                    }else {
+                        nester.setNestPos(null);
+                        nester.setNestSearchTime(20*60);
+                        nester.setNestBuildingTime(20*60);
+                    }
+                }
             }
         }
     }

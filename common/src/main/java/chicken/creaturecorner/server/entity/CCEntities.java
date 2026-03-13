@@ -28,9 +28,9 @@ public class CCEntities {
                             .sized(0.7f, 0.9f)
                             .build(ResourceLocation.fromNamespaceAndPath(CCConstants.MOD_ID, "endove").toString()));
 
-    public static final Supplier<EntityType<CaracaraEntity>> CARACARA =
+    public static final Supplier<EntityType<Caracara>> CARACARA =
             register("caracara",
-                    () -> EntityType.Builder.of(CaracaraEntity::new, MobCategory.CREATURE)
+                    () -> EntityType.Builder.of(Caracara::new, MobCategory.CREATURE)
                             .sized(1f, 1f)
                             .build(ResourceLocation.fromNamespaceAndPath(CCConstants.MOD_ID, "caracara").toString()));
 

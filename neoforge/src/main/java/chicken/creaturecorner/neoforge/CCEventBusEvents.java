@@ -18,7 +18,7 @@ public class CCEventBusEvents {
         event.put(CCEntities.PIGEON.get(), Pigeon.createAttributes().build());
 //        event.put(CCEntities.NEW_PIGEON.get(), NewPigeonEntity.createAttributes().build());
         event.put(CCEntities.ENDOVE.get(), Endove.createAttributes().build());
-        event.put(CCEntities.CARACARA.get(), CaracaraEntity.createAttributes().build());
+        event.put(CCEntities.CARACARA.get(), Caracara.createAttributes().build());
         event.put(CCEntities.COYOTE.get(), CoyoteEntity.createAttributes().build());
 
         event.put(CCEntities.GALLIAN.get(), GallianEntity.createAttributes().build());
@@ -28,7 +28,7 @@ public class CCEventBusEvents {
     public static void registerAdditionalSpawns(RegisterSpawnPlacementsEvent e) {
         e.register(CCEntities.PIGEON.get(), SpawnPlacementTypes.ON_GROUND, Heightmap.Types.WORLD_SURFACE, Pigeon::checkAnimalSpawnRules, RegisterSpawnPlacementsEvent.Operation.REPLACE);
         e.register(CCEntities.ENDOVE.get(), SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Endove::canEndoveSpawn, RegisterSpawnPlacementsEvent.Operation.OR);
-        e.register(CCEntities.CARACARA.get(), SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, CaracaraEntity::checkAnimalSpawnRules, RegisterSpawnPlacementsEvent.Operation.REPLACE);
+        e.register(CCEntities.CARACARA.get(), SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Caracara::checkAnimalSpawnRules, RegisterSpawnPlacementsEvent.Operation.REPLACE);
         e.register(CCEntities.COYOTE.get(), SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, CoyoteEntity::checkCoyoteSpawnRules, RegisterSpawnPlacementsEvent.Operation.REPLACE);
     }
 }

@@ -35,8 +35,9 @@ public abstract class AbstractCornerCreature extends Animal {
     public void tick() {
         if(this.hasHunger()) {
             if (random.nextFloat() <= 0.07 && this.getFoodLevel()>0) {
-                setFoodLevel(getFoodLevel() - 1);
-                if (getFoodLevel() <= 15) {
+                int prevFood = this.getFoodLevel();
+                this.setFoodLevel(prevFood - 1);
+                if (this.getFoodLevel() <= 15) {
                     this.starve();
                 }
             }

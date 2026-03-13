@@ -1,9 +1,17 @@
 package chicken.creaturecorner.server.entity.obj;
 
+import chicken.creaturecorner.server.block.CCBlocks;
+import chicken.creaturecorner.server.block.obj.custom.CaracaraNestBlock;
+import chicken.creaturecorner.server.block.obj.custom.PigeonNestBlock;
 import chicken.creaturecorner.server.entity.CCEntities;
+import chicken.creaturecorner.server.entity.obj.base.INestEggLayer;
 import chicken.creaturecorner.server.entity.obj.control.AnimalMoveControl;
 import chicken.creaturecorner.server.entity.obj.base.AbstractCornerCreature;
 import chicken.creaturecorner.server.entity.obj.base.goal.LookForFoodGoal;
+import chicken.creaturecorner.server.entity.obj.goal.nesting.BuildNestGoal;
+import chicken.creaturecorner.server.entity.obj.goal.nesting.EggLayerBreedGoal;
+import chicken.creaturecorner.server.entity.obj.goal.nesting.GoToNestGoal;
+import chicken.creaturecorner.server.entity.obj.goal.nesting.LocateNestGoal;
 import chicken.creaturecorner.server.sound.CCSounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ItemParticleOption;
@@ -23,8 +31,6 @@ import net.minecraft.util.TimeUtil;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.DamageSources;
-import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -41,18 +47,25 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Predicate;
 
-public class CaracaraEntity extends AbstractCornerCreature implements NeutralMob {
+import static chicken.creaturecorner.server.block.obj.custom.PigeonNestBlock.EGG_1;
+import static chicken.creaturecorner.server.block.obj.custom.PigeonNestBlock.EGG_2;
+
+public class Caracara extends AbstractCornerCreature implements NeutralMob, INestEggLayer {
 
     public final AnimationState idleAnimationState = new AnimationState();
 
@@ -61,17 +74,29 @@ public class CaracaraEntity extends AbstractCornerCreature implements NeutralMob
     private UUID persistentAngerTarget;
     public boolean wantsToFly;
     private LookForFoodGoal forFoodGoal;
+    @Nullable
+    BlockPos nestPos;
+    int layEggCounter;
+    int buildNestCounter;
+    int locateNestCooldown;
     private static final EntityDataAccessor<Integer> DATA_REMAINING_ANGER_TIME;
     private static final EntityDataAccessor<Integer> FLY_TICKS;
     private static final EntityDataAccessor<Integer> IN_FLIGHT_TICKS;
     private static final EntityDataAccessor<Boolean> FLYING;
     private static final EntityDataAccessor<Boolean> DIVING;
+
+    private static final EntityDataAccessor<Boolean> IS_PREGNANT = SynchedEntityData.defineId(Caracara.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> IS_BUILDING_NEST = SynchedEntityData.defineId(Caracara.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> IS_LAYING_EGG = SynchedEntityData.defineId(Caracara.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Integer> NEST_SEARCH_TIME = SynchedEntityData.defineId(Caracara.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> NEST_BUILD_TIME = SynchedEntityData.defineId(Caracara.class, EntityDataSerializers.INT);
+
     public AttackPhase attackPhase;
     public float currentRoll;
     public float currentPitch;
     public static final float STARTING_ANGLE = 0.015F;
 
-    public CaracaraEntity(EntityType<? extends Animal> entityType, Level level) {
+    public Caracara(EntityType<? extends Animal> entityType, Level level) {
         super(entityType, level);
         this.attackPhase = AttackPhase.CIRCLE;
         this.currentRoll = 0.0F;
@@ -119,18 +144,23 @@ public class CaracaraEntity extends AbstractCornerCreature implements NeutralMob
         this.goalSelector.addGoal(2, new CaracaraFlyMelee(this));
         this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.0F, true) {
             public boolean canUse() {
-                return !CaracaraEntity.this.canFly() && super.canUse();
+                return !Caracara.this.canFly() && super.canUse();
             }
 
             public boolean canContinueToUse() {
-                return !CaracaraEntity.this.canFly() && super.canContinueToUse();
+                return !Caracara.this.canFly() && super.canContinueToUse();
             }
         });
         this.goalSelector.addGoal(2, new CaracaraStalkPrey(this, (double)1.0F));
         this.goalSelector.addGoal(0, new FloatGoal(this));
         this.goalSelector.addGoal(4, new CaracaraStrollGoal(this, (double)0.5F));
         this.goalSelector.addGoal(7, new AIFlyIdle());
-        this.goalSelector.addGoal(4, new BreedGoal(this, (double)1.0F, CaracaraEntity.class));
+
+        this.goalSelector.addGoal(2, new EggLayerBreedGoal(this, 1));
+        this.goalSelector.addGoal(0, new Caracara.CaracaraLocateNest());
+        this.goalSelector.addGoal(2, new Caracara.CaracaraGoToNestGoal(this, 1));
+        this.goalSelector.addGoal(1, new Caracara.CaracaraBuildNestGoal());
+
         this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Pigeon.class, false));
         this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Chicken.class, false));
         this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Rabbit.class, false));
@@ -146,18 +176,33 @@ public class CaracaraEntity extends AbstractCornerCreature implements NeutralMob
         builder.define(FLYING, false);
         builder.define(DIVING, false);
         builder.define(DATA_REMAINING_ANGER_TIME, 0);
+        builder.define(IS_PREGNANT, false);
+        builder.define(IS_LAYING_EGG, false);
+        builder.define(IS_BUILDING_NEST, false);
+        builder.define(NEST_SEARCH_TIME, 0);
+        builder.define(NEST_BUILD_TIME, 0);
     }
 
     public void addAdditionalSaveData(@NotNull CompoundTag compound) {
         super.addAdditionalSaveData(compound);
         compound.putInt("FlyTicks", this.getFlyTicks());
         compound.putBoolean("IsFlying", this.isFlying());
+        compound.putBoolean("IsPregnant", isPregnant());
+        compound.putBoolean("IsLayingEgg", isLayingEgg());
+        compound.putBoolean("IsBuildingNest", isBuildingNest());
+        compound.putInt("NestSearchTime", getNestSearchTime());
+        compound.putInt("NestBuildTime", getNestBuildingTime());
     }
 
     public void readAdditionalSaveData(@NotNull CompoundTag compound) {
         super.readAdditionalSaveData(compound);
         this.setFlyTicks(compound.getInt("FlyTicks"));
         this.setFlying(compound.getBoolean("IsFlying"));
+        this.setPregnant(compound.getBoolean("IsPregnant"));
+        this.setLayingEgg(compound.getBoolean("IsLayingEgg"));
+        this.setBuildingNest(compound.getBoolean("IsBuildingNest"));
+        this.setNestSearchTime(compound.getInt("NestSearchTime"));
+        this.setNestBuildingTime(compound.getInt("NestBuildTime"));
     }
 
     public int getFlyTicks() {
@@ -196,8 +241,143 @@ public class CaracaraEntity extends AbstractCornerCreature implements NeutralMob
         return this.isHungry();
     }
 
-    public boolean isHungry() {
-        return super.isHungry();
+    @Override
+    public boolean isPregnant() {
+        return this.entityData.get(IS_PREGNANT);
+    }
+
+    @Override
+    public void setPregnant(boolean pregnant) {
+        this.entityData.set(IS_PREGNANT, pregnant);
+    }
+
+    @Override
+    public int getLayEggCounter() {
+        return this.layEggCounter;
+    }
+
+    @Override
+    public void setLayEggCounter(int layEggCounter) {
+        this.layEggCounter = layEggCounter;
+    }
+
+    @Override
+    public boolean isLayingEgg() {
+        return this.entityData.get(IS_LAYING_EGG);
+    }
+
+    @Override
+    public void setLayingEgg(boolean pIsLayingEgg) {
+        this.layEggCounter = pIsLayingEgg ? 1 : 0;
+        this.entityData.set(IS_LAYING_EGG, pIsLayingEgg);
+    }
+
+    public boolean hasNest() {
+        return this.getNestPos() != null;
+    }
+
+    @Override
+    public void setNestPos(BlockPos pPos) {
+        this.nestPos = pPos;
+    }
+
+    @Nullable
+    @Override
+    public BlockPos getNestPos() {
+        return this.nestPos;
+    }
+
+    @Override
+    public int getBuildingNestCounter() {
+        return buildNestCounter;
+    }
+
+    @Override
+    public void setBuildingNestCounter(int buildNestCounter) {
+        this.buildNestCounter = buildNestCounter;
+    }
+
+    @Override
+    public int getNestSearchTime() {
+        return this.entityData.get(NEST_SEARCH_TIME);
+    }
+
+    @Override
+    public void setNestSearchTime(int searchTime) {
+        this.entityData.set(NEST_SEARCH_TIME, searchTime);
+    }
+
+    @Override
+    public int getNestBuildingTime() {
+        return this.entityData.get(NEST_BUILD_TIME);
+    }
+
+    @Override
+    public void setNestBuildingTime(int searchTime) {
+        this.entityData.set(NEST_BUILD_TIME, searchTime);
+    }
+
+    @Override
+    public Block getNestType() {
+        return CCBlocks.CARACARA_NEST.get();
+    }
+
+    @Override
+    public boolean isBuildingNest() {
+        return this.entityData.get(IS_BUILDING_NEST);
+    }
+
+    @Override
+    public void setBuildingNest(boolean buildingNest) {
+        this.buildNestCounter = buildingNest ? 1 : 0;
+        this.entityData.set(IS_BUILDING_NEST, buildingNest);
+    }
+
+    @Override
+    public int getNestSearchCooldown() {
+        return locateNestCooldown;
+    }
+
+    @Override
+    public void setNestSearchCooldown(int cooldown) {
+        this.locateNestCooldown = cooldown;
+    }
+
+    @Override
+    public void onNestBuilt(Level level, BlockPos pos) {
+        this.getJumpControl().jump();
+        BlockState state = this.getNestType().defaultBlockState();
+        level.playSound(null, pos, SoundEvents.GRASS_PLACE, SoundSource.BLOCKS, 0.3F, 0.9F + level.random.nextFloat() * 0.2F);
+        level.setBlock(pos, state, 3);
+        level.gameEvent(GameEvent.BLOCK_PLACE, pos, GameEvent.Context.of(this, state));
+        this.setNestPos(pos);
+    }
+
+    @Override
+    public void onEggLaid(Level level, BlockPos pos) {
+        if (!this.level().isClientSide()){
+            if (this.hasNest()){
+                BlockState blockstate = CCBlocks.CARACARA_NEST.get().defaultBlockState();
+
+                if (blockstate.getBlock() instanceof CaracaraNestBlock){
+                    int eggs = this.getRandom().nextInt(1, 4);
+                    level.setBlockAndUpdate(pos, blockstate.setValue(CaracaraNestBlock.EGGS, eggs));
+
+                    level.playSound(null, pos, SoundEvents.MOSS_PLACE, SoundSource.BLOCKS, 0.3F, 0.9F + level.random.nextFloat() * 0.2F);
+                    level.playSound(null, pos, SoundEvents.TURTLE_LAY_EGG, SoundSource.BLOCKS, 0.3F, 0.9F + level.random.nextFloat() * 0.2F);
+
+                    level.gameEvent(GameEvent.BLOCK_PLACE, pos, GameEvent.Context.of(this, blockstate.setValue(CaracaraNestBlock.EGGS, eggs)));
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onBreed(AbstractCornerCreature partner) {
+        if (!this.hasNest()){
+            this.setNestSearchTime(20*60);
+            this.setNestBuildingTime(20*60);
+        }
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -288,7 +468,20 @@ public class CaracaraEntity extends AbstractCornerCreature implements NeutralMob
 
     }
 
+    @Override
+    public boolean hasHunger() {
+        return true;
+    }
+
+    private void setupAnimationStates() {
+        this.idleAnimationState.animateWhen(this.isAlive(), this.tickCount);
+    }
+
     public void tick() {
+        if (this.level().isClientSide()){
+            this.setupAnimationStates();
+        }
+
         super.tick();
         int prevFlyTicks = this.getFlyTicks();
         if (!this.level().isClientSide) {
@@ -339,6 +532,7 @@ public class CaracaraEntity extends AbstractCornerCreature implements NeutralMob
             if (this.canFly() && pigeon.isFlying() && this.random.nextInt(10) == 0) {
                 this.setFlyTicks(500);
                 this.setFlying(true);
+                this.wantsToFly = true;
             }
         }
 
@@ -353,7 +547,7 @@ public class CaracaraEntity extends AbstractCornerCreature implements NeutralMob
     }
 
     public AgeableMob getBreedOffspring(@NotNull ServerLevel serverLevel, @NotNull AgeableMob ageableMob) {
-        CaracaraEntity entity = (CaracaraEntity) CCEntities.CARACARA.get().create(serverLevel);
+        Caracara entity = (Caracara) CCEntities.CARACARA.get().create(serverLevel);
         if (entity != null) {
             entity.setBaby(true);
         }
@@ -382,7 +576,7 @@ public class CaracaraEntity extends AbstractCornerCreature implements NeutralMob
     }
 
     public boolean canAttack(LivingEntity target) {
-        return super.canAttack(target) && (this.getLastHurtByMob() != null && this.getLastHurtByMob() == target || this.isHungry() && (!this.isBaby() || this.isBaby() && (target instanceof Pigeon || target instanceof Rabbit || target instanceof Chicken)));
+        return super.canAttack(target) && ((this.getLastHurtByMob() != null && this.getLastHurtByMob() == target) || this.isHungry() && (!this.isBaby() || (this.isBaby() && ((target instanceof Pigeon && target.isBaby()) || target instanceof Rabbit || target instanceof Chicken))));
     }
 
 
@@ -451,22 +645,22 @@ public class CaracaraEntity extends AbstractCornerCreature implements NeutralMob
     }
 
     static {
-        DATA_REMAINING_ANGER_TIME = SynchedEntityData.defineId(CaracaraEntity.class, EntityDataSerializers.INT);
-        FLY_TICKS = SynchedEntityData.defineId(CaracaraEntity.class, EntityDataSerializers.INT);
-        IN_FLIGHT_TICKS = SynchedEntityData.defineId(CaracaraEntity.class, EntityDataSerializers.INT);
-        FLYING = SynchedEntityData.defineId(CaracaraEntity.class, EntityDataSerializers.BOOLEAN);
-        DIVING = SynchedEntityData.defineId(CaracaraEntity.class, EntityDataSerializers.BOOLEAN);
+        DATA_REMAINING_ANGER_TIME = SynchedEntityData.defineId(Caracara.class, EntityDataSerializers.INT);
+        FLY_TICKS = SynchedEntityData.defineId(Caracara.class, EntityDataSerializers.INT);
+        IN_FLIGHT_TICKS = SynchedEntityData.defineId(Caracara.class, EntityDataSerializers.INT);
+        FLYING = SynchedEntityData.defineId(Caracara.class, EntityDataSerializers.BOOLEAN);
+        DIVING = SynchedEntityData.defineId(Caracara.class, EntityDataSerializers.BOOLEAN);
     }
 
     public class CaracaraPathNavigation extends GroundPathNavigation {
-        private final CaracaraEntity mob;
+        private final Caracara mob;
         private float yMobOffset;
 
-        public CaracaraPathNavigation(CaracaraEntity mob, Level world) {
+        public CaracaraPathNavigation(Caracara mob, Level world) {
             this(mob, world, 0.0F);
         }
 
-        public CaracaraPathNavigation(CaracaraEntity mob, Level world, float yMobOffset) {
+        public CaracaraPathNavigation(Caracara mob, Level world, float yMobOffset) {
             super(mob, world);
             this.yMobOffset = 0.0F;
             this.mob = mob;
@@ -502,12 +696,12 @@ public class CaracaraEntity extends AbstractCornerCreature implements NeutralMob
     }
 
     public class CaracaraMoveControl extends AnimalMoveControl {
-        private final CaracaraEntity parentEntity;
+        private final Caracara parentEntity;
         private final float speedGeneral;
         private final boolean shouldLookAtTarget;
         private final boolean needsYSupport;
 
-        public CaracaraMoveControl(CaracaraEntity bird, float speedGeneral, boolean shouldLookAtTarget, boolean needsYSupport) {
+        public CaracaraMoveControl(Caracara bird, float speedGeneral, boolean shouldLookAtTarget, boolean needsYSupport) {
             super(bird, 15);
             this.parentEntity = bird;
             this.shouldLookAtTarget = shouldLookAtTarget;
@@ -515,7 +709,7 @@ public class CaracaraEntity extends AbstractCornerCreature implements NeutralMob
             this.needsYSupport = needsYSupport;
         }
 
-        public CaracaraMoveControl(CaracaraEntity bird, float speedGeneral, boolean shouldLookAtTarget) {
+        public CaracaraMoveControl(Caracara bird, float speedGeneral, boolean shouldLookAtTarget) {
             this(bird, speedGeneral, shouldLookAtTarget, false);
         }
 
@@ -593,11 +787,11 @@ public class CaracaraEntity extends AbstractCornerCreature implements NeutralMob
         }
 
         public boolean canUse() {
-            return !CaracaraEntity.this.isFlying() && !CaracaraEntity.this.canFly() && CaracaraEntity.this.onGround() && super.canUse();
+            return !Caracara.this.isFlying() && !Caracara.this.canFly() && Caracara.this.onGround() && super.canUse();
         }
 
         public boolean canContinueToUse() {
-            return !CaracaraEntity.this.isFlying() && !CaracaraEntity.this.canFly() && CaracaraEntity.this.onGround() && super.canContinueToUse();
+            return !Caracara.this.isFlying() && !Caracara.this.canFly() && Caracara.this.onGround() && super.canContinueToUse();
         }
     }
 
@@ -610,13 +804,13 @@ public class CaracaraEntity extends AbstractCornerCreature implements NeutralMob
     }
 
     static class CaracaraStalkPrey extends Goal {
-        private final CaracaraEntity bird;
+        private final Caracara bird;
         private final double speedModifier;
         
         private LivingEntity prey;
         int stalkingTicks;
 
-        CaracaraStalkPrey(CaracaraEntity pBird, double pSpeedModifier) {
+        CaracaraStalkPrey(Caracara pBird, double pSpeedModifier) {
             this.bird = pBird;
             this.speedModifier = pSpeedModifier;
             this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
@@ -660,11 +854,11 @@ public class CaracaraEntity extends AbstractCornerCreature implements NeutralMob
     }
 
     public class CaracaraFlyMelee extends Goal {
-        private final CaracaraEntity bird;
+        private final Caracara bird;
         float circleDistance = 1.0F;
         float yLevel = 2.0F;
 
-        public CaracaraFlyMelee(CaracaraEntity pBird) {
+        public CaracaraFlyMelee(Caracara pBird) {
             this.bird = pBird;
         }
 
@@ -714,7 +908,7 @@ public class CaracaraEntity extends AbstractCornerCreature implements NeutralMob
         }
 
         public boolean canUse() {
-            if (CaracaraEntity.this.isOverWaterOrVoid() && !CaracaraEntity.this.isPassenger()) {
+            if (Caracara.this.isOverWaterOrVoid() && !Caracara.this.isPassenger()) {
                 this.flightTarget = true;
                 Vec3 lvt_1_1_ = this.getPosition();
                 if (lvt_1_1_ == null) {
@@ -725,11 +919,11 @@ public class CaracaraEntity extends AbstractCornerCreature implements NeutralMob
                     this.z = lvt_1_1_.z;
                     return true;
                 }
-            } else if (CaracaraEntity.this.canFly() && !CaracaraEntity.this.isVehicle() && (CaracaraEntity.this.getTarget() == null || !CaracaraEntity.this.getTarget().isAlive()) && !CaracaraEntity.this.isPassenger()) {
-                if (CaracaraEntity.this.getRandom().nextInt(45) != 0 && !CaracaraEntity.this.isFlying()) {
+            } else if (Caracara.this.canFly() && !Caracara.this.isVehicle() && (Caracara.this.getTarget() == null || !Caracara.this.getTarget().isAlive()) && !Caracara.this.isPassenger()) {
+                if (Caracara.this.getRandom().nextInt(45) != 0 && !Caracara.this.isFlying()) {
                     return false;
                 } else {
-                    this.flightTarget = CaracaraEntity.this.canFly();
+                    this.flightTarget = Caracara.this.canFly();
                     Vec3 lvt_1_1_ = this.getPosition();
                     if (lvt_1_1_ == null) {
                         return false;
@@ -746,38 +940,156 @@ public class CaracaraEntity extends AbstractCornerCreature implements NeutralMob
         }
 
         public void tick() {
-            CaracaraEntity.this.getMoveControl().setWantedPosition(this.x, this.y, this.z, (double)0.8F);
-            if (!this.flightTarget && CaracaraEntity.this.isFlying() && CaracaraEntity.this.onGround()) {
-                CaracaraEntity.this.setFlying(false);
+            Caracara.this.getMoveControl().setWantedPosition(this.x, this.y, this.z, (double)0.8F);
+            if (!this.flightTarget && Caracara.this.isFlying() && Caracara.this.onGround()) {
+                Caracara.this.setFlying(false);
             }
 
-            if (CaracaraEntity.this.isFlying() && CaracaraEntity.this.onGround() && !CaracaraEntity.this.canFly()) {
-                CaracaraEntity.this.setFlying(false);
+            if (Caracara.this.isFlying() && Caracara.this.onGround() && !Caracara.this.canFly()) {
+                Caracara.this.setFlying(false);
             }
 
         }
 
         
         protected Vec3 getPosition() {
-            Vec3 vector3d = CaracaraEntity.this.position();
-            return !CaracaraEntity.this.canFly() && !CaracaraEntity.this.isOverWaterOrVoid() ? CaracaraEntity.this.getBlockGrounding(vector3d) : CaracaraEntity.this.getBlockInViewAway(vector3d, 10.0F);
+            Vec3 vector3d = Caracara.this.position();
+            return !Caracara.this.canFly() && !Caracara.this.isOverWaterOrVoid() ? Caracara.this.getBlockGrounding(vector3d) : Caracara.this.getBlockInViewAway(vector3d, 10.0F);
         }
 
         public boolean canContinueToUse() {
-            return CaracaraEntity.this.isFlying() && CaracaraEntity.this.distanceToSqr(this.x, this.y, this.z) > (double)5.0F;
+            return Caracara.this.isFlying() && Caracara.this.distanceToSqr(this.x, this.y, this.z) > (double)5.0F;
         }
 
         public void start() {
-            CaracaraEntity.this.setFlying(true);
-            CaracaraEntity.this.getMoveControl().setWantedPosition(this.x, this.y, this.z, (double)0.8F);
+            Caracara.this.setFlying(true);
+            Caracara.this.getMoveControl().setWantedPosition(this.x, this.y, this.z, (double)0.8F);
         }
 
         public void stop() {
-            CaracaraEntity.this.getNavigation().stop();
+            Caracara.this.getNavigation().stop();
             this.x = (double)0.0F;
             this.y = (double)0.0F;
             this.z = (double)0.0F;
             super.stop();
+        }
+    }
+
+
+
+    class CaracaraLocateNest extends LocateNestGoal {
+
+        public CaracaraLocateNest() {
+            super(Caracara.this, 24);
+        }
+
+        @Override
+        protected boolean isValidTarget(LevelReader level, BlockPos blockPos) {
+            if (level.getBlockState(blockPos).getBlock() instanceof PigeonNestBlock pigeonNest && creature instanceof INestEggLayer nestEggLayer)
+                return pigeonNest.isEmpty(level.getBlockState(blockPos)) && level.getBlockState(blockPos).is(nestEggLayer.getNestType());
+            return false;
+        }
+    }
+
+    class CaracaraBuildNestGoal extends BuildNestGoal {
+        public CaracaraBuildNestGoal() {
+            super(Caracara.this, 1, 0.9, 10);
+        }
+
+        @Override
+        public boolean isValidTarget(LevelReader pLevel, BlockPos pPos) {
+            return ((pLevel.getBlockState(pPos.below()).is(Blocks.CACTUS) && Caracara.this.getNestBuildingTime()>0)
+                    || Caracara.this.getNestBuildingTime()==0) && super.isValidTarget(pLevel, pPos);
+        }
+
+        @Override
+        public void start() {
+            super.start();
+
+            Caracara.this.setFlyTicks(1500);
+            Caracara.this.setFlying(true);
+            Caracara.this.wantsToFly = true;
+        }
+
+        @Override
+        protected boolean isReachedTarget() {
+            if (super.isReachedTarget()){
+                Caracara.this.setFlyTicks(0);
+                Caracara.this.setFlying(false);
+                Caracara.this.wantsToFly = false;
+            }
+
+            return super.isReachedTarget();
+        }
+
+        @Override
+        protected boolean findNearestBlock() {
+            if (Caracara.this.getNestBuildingTime()>0){
+                return super.findNearestBlock();
+            }else
+            {
+                int i = 25;
+                int j = 10;
+                BlockPos blockpos = this.mob.blockPosition();
+                BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
+
+                for(int k = j; k >= -j; k--) {
+                    for(int l = 0; l < i; ++l) {
+                        for(int i1 = 0; i1 <= l; i1 = i1 > 0 ? -i1 : 1 - i1) {
+                            for(int j1 = i1 < l && i1 > -l ? l : 0; j1 <= l; j1 = j1 > 0 ? -j1 : 1 - j1) {
+                                blockpos$mutableblockpos.setWithOffset(blockpos, i1, k, j1);
+                                if (this.mob.isWithinRestriction(blockpos$mutableblockpos) && this.isValidTarget(this.mob.level(), blockpos$mutableblockpos)) {
+                                    this.blockPos = blockpos$mutableblockpos;
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+                return false;
+            }
+        }
+    }
+
+    class CaracaraGoToNestGoal extends GoToNestGoal {
+
+        public CaracaraGoToNestGoal(AbstractCornerCreature mob, double speedModifier) {
+            super(mob, speedModifier);
+        }
+
+        @Override
+        protected boolean isReachedTarget() {
+            if (super.isReachedTarget()){
+                Caracara.this.setFlyTicks(0);
+                Caracara.this.setFlying(false);
+                Caracara.this.wantsToFly = false;
+            }
+
+            return super.isReachedTarget();
+        }
+
+        public BlockPos getMoveToTarget() {
+            return this.blockPos.offset(0, 1, 0);
+        }
+
+        @Override
+        public void start() {
+            if (this.mob instanceof INestEggLayer nester && nester.hasNest()){
+                this.blockPos = nester.getNestPos();
+                if (this.mob.level().getBlockState(blockPos).getBlock() instanceof CaracaraNestBlock nestBlock){
+                    if (this.mob.level().getBlockState(blockPos).is(nester.getNestType())
+                            && nestBlock.isEmpty(this.mob.level().getBlockState(blockPos))){
+                        Caracara.this.setFlyTicks(1500);
+                        Caracara.this.setFlying(true);
+                        Caracara.this.wantsToFly = true;
+                        this.moveMobToBlockWithOffset(0, 0.5, 0);
+                    }else {
+                        nester.setNestPos(null);
+                        nester.setNestSearchTime(20*60);
+                        nester.setNestBuildingTime(20*60);
+                    }
+                }
+            }
         }
     }
 

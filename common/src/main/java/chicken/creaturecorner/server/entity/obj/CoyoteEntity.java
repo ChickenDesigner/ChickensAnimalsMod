@@ -87,7 +87,6 @@ public class CoyoteEntity extends GeoTamableEntity implements NeutralMob {
         this.lookControl = new CoyoteLookControl(this);
         this.moveControl = new CoyoteMoveControl(this);
         this.setPathfindingMalus(PathType.DANGER_OTHER, 0.0F);
-        this.setPathfindingMalus(PathType.DAMAGE_OTHER, 0.0F);
     }
 
     protected void registerGoals() {
@@ -476,16 +475,8 @@ public class CoyoteEntity extends GeoTamableEntity implements NeutralMob {
         this.setRemainingPersistentAngerTime(PERSISTENT_ANGER_TIME.sample(this.random));
     }
 
-//    public void checkOwnerHurt() {
-//        if (this.getLastHurtMob() != null && this.isOwnedBy(this.getLastHurtMob())) {
-//            this.attackedOnce = false;
-//        }
-//
-
     public boolean hurt(DamageSource source, float amount) {
-        if (this.level().isClientSide) {
-            return false;
-        }else {
+        if (!this.level().isClientSide) {
             if (this.isTame() && !source.is(DamageTypes.THORNS)) {
                 Entity var4 = source.getDirectEntity();
                 if (var4 instanceof Player owner) {
@@ -500,10 +491,8 @@ public class CoyoteEntity extends GeoTamableEntity implements NeutralMob {
                     }
                 }
             }
-
-            return super.hurt(source, amount);
         }
-
+        return super.hurt(source, amount);
     }
 
     static {

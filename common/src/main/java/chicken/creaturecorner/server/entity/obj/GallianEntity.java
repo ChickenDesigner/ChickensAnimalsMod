@@ -7,13 +7,16 @@ import chicken.creaturecorner.server.entity.obj.base.IAnimatedEater;
 import chicken.creaturecorner.server.entity.obj.goal.AnimatedAttackGoal;
 import chicken.creaturecorner.server.entity.obj.goal.DefendFarmAnimalsGoal;
 import chicken.creaturecorner.server.entity.obj.goal.EatGrassGoal;
+import chicken.creaturecorner.server.sound.CCSounds;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.TimeUtil;
 import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -22,8 +25,12 @@ import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.ResetUniversalAngerTargetGoal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
+import net.minecraft.world.entity.ai.util.LandRandomPos;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.Fox;
 import net.minecraft.world.entity.animal.Wolf;
+import net.minecraft.world.entity.animal.goat.Goat;
+import net.minecraft.world.entity.animal.horse.Llama;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -31,6 +38,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.function.Predicate;
 
@@ -273,6 +281,31 @@ public class GallianEntity extends GeoTamableEntity implements NeutralMob, IAnim
         }
 
         super.tick();
+
+        if (!this.isBaby())
+            this.attractBabyAnimals();
+    }
+
+    @Override
+    public boolean canAttack(LivingEntity livingentity, TargetingConditions condition) {
+        return !(livingentity instanceof Goat) && !(livingentity instanceof Llama) && super.canAttack(livingentity, condition);
+    }
+
+    private void attractBabyAnimals() {
+        if (this.tickCount % 10 == 0) {
+            List<Animal> list = this.level().getEntitiesOfClass(Animal.class, this.getBoundingBox().inflate(16, 8, 16));
+            for (Animal e : list) {
+                if(e.isBaby() && !(e instanceof GallianEntity) && !(e instanceof TamableAnimal tamedMob && tamedMob.isInSittingPose())){
+                    e.setTarget(null);
+                    e.setLastHurtByMob(null);
+                    Vec3 vec = LandRandomPos.getPosTowards(e, 20, 7, this.position());
+                    if (vec != null) {
+                        e.getNavigation().moveTo(vec.x, vec.y, vec.z, 1.15D);
+                    }
+                }
+            }
+
+        }
     }
 
     private void setupAnimationStates() {
@@ -342,5 +375,20 @@ public class GallianEntity extends GeoTamableEntity implements NeutralMob, IAnim
         }
 
         return aabb.inflate(0.5, 0.5, 0.5);
+    }
+
+    @Override
+    protected @Nullable SoundEvent getAmbientSound() {
+        return CCSounds.GALLIAN_IDLE.get();
+    }
+
+    @Override
+    protected @Nullable SoundEvent getHurtSound(DamageSource damageSource) {
+        return CCSounds.GALLIAN_HURT.get();
+    }
+
+    @Override
+    protected @Nullable SoundEvent getDeathSound() {
+        return CCSounds.GALLIAN_DEATH.get();
     }
 }

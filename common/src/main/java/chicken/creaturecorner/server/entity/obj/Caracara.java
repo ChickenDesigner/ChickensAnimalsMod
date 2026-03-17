@@ -45,6 +45,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -62,15 +63,15 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Predicate;
 
-import static chicken.creaturecorner.server.block.obj.custom.PigeonNestBlock.EGG_1;
-import static chicken.creaturecorner.server.block.obj.custom.PigeonNestBlock.EGG_2;
 
 public class Caracara extends AbstractCornerCreature implements NeutralMob, INestEggLayer {
 
     public final AnimationState idleAnimationState = new AnimationState();
 
     private static final UniformInt PERSISTENT_ANGER_TIME = TimeUtil.rangeOfSeconds(20, 39);
-    
+
+    Ingredient FOOD_INGREDIENTS = Ingredient.of(Items.RABBIT, Items.PORKCHOP);
+
     private UUID persistentAngerTarget;
     public boolean wantsToFly;
     private LookForFoodGoal forFoodGoal;
@@ -151,6 +152,8 @@ public class Caracara extends AbstractCornerCreature implements NeutralMob, INes
                 return !Caracara.this.canFly() && super.canContinueToUse();
             }
         });
+        this.goalSelector.addGoal(1, new TemptGoal(this, 1.5, itemstack -> itemstack.is(Items.RABBIT), false));
+
         this.goalSelector.addGoal(2, new CaracaraStalkPrey(this, (double)1.0F));
         this.goalSelector.addGoal(0, new FloatGoal(this));
         this.goalSelector.addGoal(4, new CaracaraStrollGoal(this, (double)0.5F));
@@ -466,6 +469,15 @@ public class Caracara extends AbstractCornerCreature implements NeutralMob, INes
             this.currentRoll = 0.0F;
         }
 
+        if (this.isAlive() && (this.isLayingEgg() && this.layEggCounter >= 1 && this.layEggCounter % 5 == 0)) {
+            BlockPos blockpos = this.blockPosition();
+            this.level().levelEvent(2001, blockpos, Block.getId(this.level().getBlockState(blockpos)));
+        }
+        if (this.isAlive() && (this.isBuildingNest() && this.buildNestCounter >= 1 && this.buildNestCounter % 5 == 0)) {
+            BlockPos blockpos = this.blockPosition().below();
+            this.level().levelEvent(2001, blockpos, Block.getId(this.level().getBlockState(blockpos)));
+        }
+
     }
 
     @Override
@@ -543,7 +555,7 @@ public class Caracara extends AbstractCornerCreature implements NeutralMob, INes
     }
 
     public boolean isFood(ItemStack itemStack) {
-        return itemStack.is(ItemTags.VILLAGER_PLANTABLE_SEEDS);
+        return itemStack.is(Items.RABBIT);
     }
 
     public AgeableMob getBreedOffspring(@NotNull ServerLevel serverLevel, @NotNull AgeableMob ageableMob) {
@@ -985,8 +997,8 @@ public class Caracara extends AbstractCornerCreature implements NeutralMob, INes
 
         @Override
         protected boolean isValidTarget(LevelReader level, BlockPos blockPos) {
-            if (level.getBlockState(blockPos).getBlock() instanceof PigeonNestBlock pigeonNest && creature instanceof INestEggLayer nestEggLayer)
-                return pigeonNest.isEmpty(level.getBlockState(blockPos)) && level.getBlockState(blockPos).is(nestEggLayer.getNestType());
+            if (level.getBlockState(blockPos).getBlock() instanceof CaracaraNestBlock nest && creature instanceof INestEggLayer nestEggLayer)
+                return nest.isEmpty(level.getBlockState(blockPos)) && level.getBlockState(blockPos).is(nestEggLayer.getNestType());
             return false;
         }
     }
@@ -998,8 +1010,8 @@ public class Caracara extends AbstractCornerCreature implements NeutralMob, INes
 
         @Override
         public boolean isValidTarget(LevelReader pLevel, BlockPos pPos) {
-            return ((pLevel.getBlockState(pPos.below()).is(Blocks.CACTUS) && Caracara.this.getNestBuildingTime()>0)
-                    || Caracara.this.getNestBuildingTime()==0) && super.isValidTarget(pLevel, pPos);
+            return ((pLevel.getBlockState(pPos).is(Blocks.CACTUS) && pLevel.isEmptyBlock(pPos.above()) && Caracara.this.getNestBuildingTime()>0))
+                    || (Caracara.this.getNestBuildingTime()==0 && super.isValidTarget(pLevel, pPos));
         }
 
         @Override
@@ -1066,10 +1078,6 @@ public class Caracara extends AbstractCornerCreature implements NeutralMob, INes
             }
 
             return super.isReachedTarget();
-        }
-
-        public BlockPos getMoveToTarget() {
-            return this.blockPos.offset(0, 1, 0);
         }
 
         @Override

@@ -16,6 +16,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -206,7 +207,7 @@ public class PigeonLoftBlockEntity extends BlockEntity {
         this.pigeons.clear();
         this.addPigeon(nbtCompound, ticksInDwelling);
         if (this.level != null) {
-//            this.level.playSound(null, blockPos.getX(), blockPos.getY(), blockPos.getZ(), SpeciesSoundEvents.BLOCK_PIGEON_DWELLING_ENTER.get(), SoundSource.BLOCKS, 1.0f, 1.0f);
+            this.level.playSound(null, blockPos.getX(), blockPos.getY(), blockPos.getZ(), SoundEvents.BEEHIVE_ENTER, SoundSource.BLOCKS, 1.0f, 1.0f);
             this.level.gameEvent(GameEvent.BLOCK_CHANGE, blockPos, GameEvent.Context.of(entity, this.getBlockState()));
         }
         entity.discard();
@@ -266,7 +267,7 @@ public class PigeonLoftBlockEntity extends BlockEntity {
                 double z = (double)pos.getZ() + 0.5 + d * (double)direction.getStepZ();
                 newPigeon.moveTo(x, y, z, newPigeon.getYRot(), newPigeon.getXRot());
 
-//            world.playSound(null, pos, SpeciesSoundEvents.BLOCK_PIGEON_DWELLING_EXIT.get(), SoundSource.BLOCKS, 1.0f, 1.0f);
+                world.playSound(null, blockPos.getX(), blockPos.getY(), blockPos.getZ(), SoundEvents.BEEHIVE_EXIT, SoundSource.BLOCKS, 1.0f, 1.0f);
                 world.gameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Context.of(newPigeon, world.getBlockState(pos)));
                 pigeonEntity.setLoftPos(pos);
                 blockEntity.setChanged();
@@ -335,7 +336,7 @@ public class PigeonLoftBlockEntity extends BlockEntity {
             double d = (double)pos.getX() + 0.5;
             double e = pos.getY();
             double f = (double)pos.getZ() + 0.5;
-            world.playSound(null, d, e, f, CCSounds.PIGEON_IDLE.get(), SoundSource.BLOCKS, 1.0f, 1.0f);
+            world.playSound(null, d, e, f, CCSounds.PIGEON_SNORE.get(), SoundSource.BLOCKS, 1.0f, 1.0f);
         }
     }
 

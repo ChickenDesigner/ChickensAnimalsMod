@@ -153,6 +153,8 @@ public class Pigeon extends AbstractCornerCreature implements INestEggLayer {
         this.goalSelector.addGoal(2, new PigeonGoToNestGoal(this, 1));
         this.goalSelector.addGoal(1, new PigeonBuildNestGoal());
 
+        this.goalSelector.addGoal(1, new TemptGoal(this, 1.15, itemstack -> itemstack.is(ItemTags.CHICKEN_FOOD), false));
+
 
         this.goalSelector.addGoal(8, new PigeonFlyGoal());
     }
@@ -712,7 +714,7 @@ public class Pigeon extends AbstractCornerCreature implements INestEggLayer {
 
     @Override
     public boolean isFood(ItemStack itemStack) {
-        return itemStack.is(ItemTags.VILLAGER_PLANTABLE_SEEDS);
+        return itemStack.is(ItemTags.CHICKEN_FOOD);
     }
 
 

@@ -178,6 +178,42 @@
     ],
     "subtitle": "creaturecorner.sound.subtitle.coyote_death"
   },
+  "gallian_idle": {
+    "category": "neutral",
+    "sounds": [
+      {
+        "name": "creaturecorner:gallian_idle_1"
+      },
+      {
+        "name": "creaturecorner:gallian_idle_2"
+      },
+      {
+        "name": "creaturecorner:gallian_idle_3"
+      }
+    ],
+    "subtitle": "creaturecorner.sound.subtitle.gallian_idle"
+  },
+  "gallian_hurt": {
+    "category": "neutral",
+    "sounds": [
+      {
+        "name": "creaturecorner:gallian_hurt_1"
+      },
+      {
+        "name": "creaturecorner:gallian_hurt_2"
+      }
+    ],
+    "subtitle": "creaturecorner.sound.subtitle.gallian_hurt"
+  },
+  "gallian_death": {
+    "category": "neutral",
+    "sounds": [
+      {
+        "name": "creaturecorner:gallian_death"
+      }
+    ],
+    "subtitle": "creaturecorner.sound.subtitle.gallian_death"
+  },
   "gallian_egg_crack": {
     "category": "neutral",
     "sounds": [
@@ -217,5 +253,24 @@
       }
     ],
     "subtitle": "creaturecorner.sound.subtitle.gallian_egg_hatch"
+  },
+
+  "pigeon_snore": {
+    "category": "neutral",
+    "sounds": [
+      {
+        "name": "creaturecorner:pigeon_sleep_1"
+      },
+      {
+        "name": "creaturecorner:pigeon_sleep_2"
+      },
+      {
+        "name": "creaturecorner:pigeon_sleep_3"
+      },
+      {
+        "name": "creaturecorner:pigeon_sleep_4"
+      }
+    ],
+    "subtitle": "creaturecorner.sound.subtitle.pigeon_snore"
   }
 }

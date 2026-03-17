@@ -23,6 +23,8 @@
   "creaturecorner.sound.subtitle.endove_hurt" : "Endove Hurts",
   "creaturecorner.sound.subtitle.endove_death" : "Endove Dies",
 
+  "creaturecorner.sound.subtitle.pigeon_snore" : "Pigeon Snores",
+
   "creaturecorner.sound.subtitle.caracara_idle" : "Caracara Crackles",
   "creaturecorner.sound.subtitle.caracara_hurt" : "Caracara Hurts",
   "creaturecorner.sound.subtitle.caracara_death" : "Caracara Dies",
@@ -31,11 +33,14 @@
   "creaturecorner.sound.subtitle.coyote_hurt" : "Coyote Hurts",
   "creaturecorner.sound.subtitle.coyote_death" : "Coyote Dies",
 
+  "creaturecorner.sound.subtitle.gallian_idle" : "Gallian Coos",
+  "creaturecorner.sound.subtitle.gallian_hurt" : "Gallian Hurts",
+  "creaturecorner.sound.subtitle.gallian_death" : "Gallian Dies",
   "creaturecorner.sound.subtitle.gallian_egg_crack" : "Gallian Egg Cracks",
   "creaturecorner.sound.subtitle.gallian_egg_hatch" : "Gallian Egg Hatches",
 
   "block.creaturecorner.gallian_egg": "Gallian Egg",
-  "item.creaturecorner.gallian_spawn_egg": "Coyote Spawn Egg",
+  "item.creaturecorner.gallian_spawn_egg": "Gallian Spawn Egg",
 
   "block.creaturecorner.pigeon_loft": "Pigeon Loft",
 

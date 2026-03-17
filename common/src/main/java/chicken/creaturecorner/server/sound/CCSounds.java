@@ -25,6 +25,8 @@ public class CCSounds {
     public static final Supplier<SoundEvent> ENDOVE_HURT = registerSoundEvents("endove_hurt");
     public static final Supplier<SoundEvent> ENDOVE_DEATH = registerSoundEvents("endove_death");
 
+    public static final Supplier<SoundEvent> PIGEON_SNORE = registerSoundEvents("pigeon_snore");
+
     public static final Supplier<SoundEvent> COYOTE_IDLE = registerSoundEvents("coyote_idle");
     public static final Supplier<SoundEvent> COYOTE_HURT = registerSoundEvents("coyote_hurt");
     public static final Supplier<SoundEvent> COYOTE_DEATH = registerSoundEvents("coyote_death");
@@ -35,6 +37,10 @@ public class CCSounds {
 
     public static final Supplier<SoundEvent> GALLIAN_EGG_CRACK = registerSoundEvents("gallian_egg_crack");
     public static final Supplier<SoundEvent> GALLIAN_EGG_HATCH = registerSoundEvents("gallian_egg_hatch");
+
+    public static final Supplier<SoundEvent> GALLIAN_IDLE = registerSoundEvents( "gallian_idle");
+    public static final Supplier<SoundEvent> GALLIAN_HURT = registerSoundEvents( "gallian_hurt");
+    public static final Supplier<SoundEvent> GALLIAN_DEATH = registerSoundEvents("gallian_death");
 
 
     private static ResourceKey<JukeboxSong> createSong(String name) {

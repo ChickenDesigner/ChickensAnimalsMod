@@ -1069,15 +1069,16 @@ public class Caracara extends AbstractCornerCreature implements NeutralMob, INes
             super(mob, speedModifier);
         }
 
-        @Override
-        protected boolean isReachedTarget() {
-            if (super.isReachedTarget()){
-                Caracara.this.setFlyTicks(0);
-                Caracara.this.setFlying(false);
-                Caracara.this.wantsToFly = false;
-            }
+        public void onLand() {
+            Caracara.this.setFlyTicks(0);
+            Caracara.this.setFlying(false);
+            Caracara.this.wantsToFly = false;
+        }
 
-            return super.isReachedTarget();
+        public void onTryAgain() {
+            Caracara.this.setFlyTicks(1500);
+            Caracara.this.setFlying(true);
+            Caracara.this.wantsToFly = true;
         }
 
         @Override
@@ -1090,7 +1091,7 @@ public class Caracara extends AbstractCornerCreature implements NeutralMob, INes
                         Caracara.this.setFlyTicks(1500);
                         Caracara.this.setFlying(true);
                         Caracara.this.wantsToFly = true;
-                        this.moveMobToBlockWithOffset(0, 0.5, 0);
+                        this.moveMobToBlockWithOffset(0, 0.15, 0);
                     }else {
                         nester.setNestPos(null);
                         nester.setNestSearchTime(20*60);

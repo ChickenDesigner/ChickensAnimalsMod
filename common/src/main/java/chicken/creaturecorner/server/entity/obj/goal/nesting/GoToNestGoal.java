@@ -71,13 +71,23 @@ public class GoToNestGoal extends Goal {
 
     public void tick() {
         BlockPos blockpos = this.getMoveToTarget();
+
+
         if (!blockpos.closerToCenterThan(this.mob.position(), this.acceptedDistance())) {
+            if (this.reachedTarget)
+                this.onTryAgain();
             this.reachedTarget = false;
+
             ++this.tryTicks;
             if (this.shouldRecalculatePath()) {
-                this.mob.getNavigation().moveTo((double)blockpos.getX() + (double)0.5F, (double)blockpos.getY()+1, (double)blockpos.getZ() + (double)0.5F, this.speedModifier);
+                this.mob.getNavigation().moveTo((double)blockpos.getX() + (double)0.5F, (double)blockpos.getY()+0.5F, (double)blockpos.getZ() + (double)0.5F, this.speedModifier);
             }
         } else {
+            if (this.shouldRecalculatePath()) {
+                this.mob.getNavigation().moveTo((double)blockpos.getX() + (double)0.5F, (double)blockpos.getY()+0.15F, (double)blockpos.getZ() + (double)0.5F, this.speedModifier);
+            }
+            if (!this.reachedTarget)
+                this.onLand();
             this.reachedTarget = true;
 
             if (this.mob instanceof INestEggLayer eggLayer){
@@ -109,5 +119,11 @@ public class GoToNestGoal extends Goal {
 
     protected boolean isReachedTarget() {
         return this.reachedTarget;
+    }
+
+    public void onLand() {
+    }
+
+    public void onTryAgain() {
     }
 }

@@ -1,0 +1,9 @@
+{
+  "entries": [
+    "creaturecorner:gallian_egg_from_jungle_temple",
+    "creaturecorner:gallian_egg_from_shipwreck",
+    "creaturecorner:gallian_grotto_from_jungle_temple",
+    "creaturecorner:gallian_grotto_from_shipwreck"
+  ],
+  "replace": false
+}

@@ -60,6 +60,7 @@ public class GallianEntity extends GeoTamableEntity implements NeutralMob, IAnim
     private static final EntityDataAccessor<Boolean> ATTACKING = SynchedEntityData.defineId(GallianEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> IS_EATING = SynchedEntityData.defineId(GallianEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> IS_SQUINTING = SynchedEntityData.defineId(GallianEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> IS_LEADER = SynchedEntityData.defineId(GallianEntity.class, EntityDataSerializers.BOOLEAN);
 
     private final Predicate<LivingEntity> SCARY_MOB = (pEntity) -> {
 
@@ -128,6 +129,7 @@ public class GallianEntity extends GeoTamableEntity implements NeutralMob, IAnim
         builder.define(ATTACKING, false);
         builder.define(IS_EATING, false);
         builder.define(IS_SQUINTING, false);
+        builder.define(IS_LEADER, false);
     }
 
     @Override
@@ -137,14 +139,20 @@ public class GallianEntity extends GeoTamableEntity implements NeutralMob, IAnim
 
     public void addAdditionalSaveData(CompoundTag compound) {
         super.addAdditionalSaveData(compound);
-        compound.putBoolean("Attacking", this.isAttacking());
-        compound.putBoolean("IsEating", this.isEating());
+        compound.putBoolean("Leader", this.isLeader());
     }
 
     public void readAdditionalSaveData(CompoundTag compound) {
         super.readAdditionalSaveData(compound);
-        this.setAttacking(compound.getBoolean("Attacking"));
-        this.setEating(compound.getBoolean("IsEating"));
+        this.setIsLeader(compound.getBoolean("Leader"));
+    }
+
+    public boolean isLeader() {
+        return this.entityData.get(IS_LEADER);
+    }
+
+    public void setIsLeader(boolean leader) {
+        this.entityData.set(IS_LEADER, leader);
     }
 
     public boolean isAttacking() {
@@ -282,8 +290,30 @@ public class GallianEntity extends GeoTamableEntity implements NeutralMob, IAnim
 
         super.tick();
 
-        if (!this.isBaby())
+        if (!this.isBaby() && this.isLeader() && this.tickCount % 7 == 0)
             this.attractBabyAnimals();
+
+        if (this.isBaby() && this.isLeader())
+            this.setIsLeader(false);
+
+        if (!this.isBaby() && this.level().random.nextInt(300) == 1){
+            boolean foundLeaders = false;
+            List<GallianEntity> list = this.level().getEntitiesOfClass(GallianEntity.class, this.getBoundingBox().inflate(20, 10, 20));
+            for (GallianEntity e : list) {
+                if(!e.isBaby() && e.isLeader() && this.isLeader()){
+                    if (this.getRandom().nextBoolean())
+                        e.setIsLeader(false);
+                    else
+                        this.setIsLeader(false);
+
+                    foundLeaders = true;
+                    break;
+                }
+            }
+            if (!foundLeaders){
+                this.setIsLeader(true);
+            }
+        }
     }
 
     @Override
@@ -292,19 +322,16 @@ public class GallianEntity extends GeoTamableEntity implements NeutralMob, IAnim
     }
 
     private void attractBabyAnimals() {
-        if (this.tickCount % 10 == 0) {
-            List<Animal> list = this.level().getEntitiesOfClass(Animal.class, this.getBoundingBox().inflate(16, 8, 16));
-            for (Animal e : list) {
-                if(e.isBaby() && !(e instanceof GallianEntity) && !(e instanceof TamableAnimal tamedMob && tamedMob.isInSittingPose())){
-                    e.setTarget(null);
-                    e.setLastHurtByMob(null);
-                    Vec3 vec = LandRandomPos.getPosTowards(e, 20, 7, this.position());
-                    if (vec != null) {
-                        e.getNavigation().moveTo(vec.x, vec.y, vec.z, 1.15D);
-                    }
+        List<Animal> list = this.level().getEntitiesOfClass(Animal.class, this.getBoundingBox().inflate(16, 8, 16));
+        for (Animal e : list) {
+            if(e.isBaby() && !(e instanceof GallianEntity) && !(e instanceof TamableAnimal tamedMob && tamedMob.isInSittingPose())){
+                e.setTarget(null);
+                e.setLastHurtByMob(null);
+                Vec3 vec = LandRandomPos.getPosTowards(e, 20, 7, this.position());
+                if (vec != null) {
+                    e.getNavigation().moveTo(vec.x, vec.y, vec.z, 1.15D);
                 }
             }
-
         }
     }
 
